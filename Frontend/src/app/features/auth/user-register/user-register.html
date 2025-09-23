@@ -1,0 +1,90 @@
+<app-header></app-header>
+<div class="register-container">
+  <div class="register-card">
+    <div class="register-header">
+      <div class="logo">
+        <i class="bi bi-bag-check-fill"></i>
+        <h1>MyStore</h1>
+      </div>
+      <h2>Create Account</h2>
+    </div>
+
+    <form [formGroup]="registrationForm" (ngSubmit)="onSubmit()" class="register-form">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input formControlName="username" type="text" placeholder="Enter your name" class="form-input"
+               [class.error]="f['username'].touched && f['username'].invalid" />
+        <div *ngIf="f['username'].touched && f['username'].invalid" class="form-error">
+          <div *ngIf="f['username'].errors?.['required']">Username is required.</div>
+          <div *ngIf="f['username'].errors?.['minlength']">Minimum 3 characters required.</div>
+          <div *ngIf="f['username'].errors?.['pattern']">Username must start with a letter and contain only letters or numbers.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input formControlName="email" type="email" placeholder="Enter your email" class="form-input"
+               [class.error]="f['email'].touched && f['email'].invalid" />
+        <div *ngIf="f['email'].touched && f['email'].invalid" class="form-error">
+          <div *ngIf="f['email'].errors?.['required']">Email is required.</div>
+          <div *ngIf="f['email'].errors?.['email']">Enter a valid email address.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Phone Number</label>
+        <input formControlName="phone" type="tel" placeholder="Enter phone number" class="form-input"
+               [class.error]="f['phone'].touched && f['phone'].invalid" />
+        <div *ngIf="f['phone'].touched && f['phone'].invalid" class="form-error">
+          <div *ngIf="f['phone'].errors?.['required']">Phone number is required.</div>
+          <div *ngIf="f['phone'].errors?.['pattern']">Enter a valid 10-digit phone number.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Gender</label>
+        <select formControlName="gender" class="form-input"
+                [class.error]="f['gender'].touched && f['gender'].invalid">
+          <option value="">Select Gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+        <div *ngIf="f['gender'].touched && f['gender'].invalid" class="form-error">
+          <div *ngIf="f['gender'].errors?.['required']">Gender is required.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input formControlName="password" type="password" placeholder="Enter password" class="form-input"
+               [class.error]="f['password'].touched && f['password'].invalid" />
+        <div *ngIf="f['password'].touched && f['password'].invalid" class="form-error">
+          <div *ngIf="f['password'].errors?.['required']">Password is required.</div>
+          <div *ngIf="f['password'].errors?.['minlength']">Minimum 6 characters required.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm Password</label>
+        <input formControlName="confirmPassword" type="password" placeholder="Confirm password" class="form-input"
+               [class.error]="f['confirmPassword'].touched && f['confirmPassword'].invalid" />
+        <div *ngIf="f['confirmPassword'].touched && f['confirmPassword'].invalid" class="form-error">
+          <div *ngIf="f['confirmPassword'].errors?.['required']">Confirm password is required.</div>
+        </div>
+        <div *ngIf="registrationForm.hasError('passwordMismatch') && (f['confirmPassword'].touched || f['password'].touched)" class="form-error">
+          Passwords do not match.
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="!registrationForm.valid" class="btn btn-primary register-btn">
+        Create Account
+      </button>
+    </form>
+
+    <div class="register-footer">
+      <span>Already have an account?</span>
+      <a routerLink="/login">Sign In</a>
+    </div>
+  </div>
+</div>

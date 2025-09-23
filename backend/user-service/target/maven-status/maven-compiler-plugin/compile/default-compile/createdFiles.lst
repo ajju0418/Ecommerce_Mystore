@@ -1,0 +1,10 @@
+com\estore\user\controller\UserController.class
+com\estore\user\entity\User.class
+com\estore\user\service\DataInitializationService.class
+com\estore\user\service\UserService.class
+com\estore\user\UserServiceApplication.class
+com\estore\user\UserServiceHealthController.class
+com\estore\user\dto\UserRegistrationDto.class
+com\estore\user\dto\UserResponseDto.class
+com\estore\user\repository\UserRepository.class
+com\estore\user\dto\UserLoginDto.class

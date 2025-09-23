@@ -1,0 +1,227 @@
+<div class="admin-products">
+  <!-- Header Section -->
+  <div class="mb-8">
+    <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/30">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-3xl font-bold text-gray-800 mb-2">Clothing Store Management</h2>
+          <p class="text-gray-600">Manage your clothing inventory and products</p>
+        </div>
+        <button (click)="showAddForm = true"
+                class="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          Add New Product
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Filters Section -->
+  <div class="mb-6">
+    <div class="bg-white/20 backdrop-blur-xl rounded-2xl p-6 shadow-2xl border border-white/30">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <!-- Search Field -->
+        <div class="md:col-span-2">
+          <div class="relative">
+            <input type="text" [(ngModel)]="searchTerm" (input)="applyFilters()"
+                   placeholder="Search by name, category, brand..."
+                   class="w-full bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-3 pl-12 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent">
+            <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+        <!-- Category Filter -->
+        <div>
+          <select [(ngModel)]="selectedCategory" (change)="applyFilters()"
+                  class="w-full bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent">
+            <option value="">All Categories</option>
+            <option *ngFor="let category of categories">{{ category }}</option>
+          </select>
+        </div>
+        <!-- Status Filter -->
+        <div>
+          <select [(ngModel)]="selectedStatus" (change)="applyFilters()"
+                  class="w-full bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl px-4 py-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent">
+            <option value="">All Statuses</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="Out of Stock">Out of Stock</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Data Table -->
+  <div class="bg-white/20 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/30 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead class="bg-white/30 backdrop-blur-sm">
+          <tr>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Image</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Product Name</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Category</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Brand</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Price</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Stock</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Status</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/20">
+          <tr *ngFor="let product of filteredProducts">
+            <td class="px-6 py-4">
+              <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
+                              <img [src]="product.imageUrl" [alt]="product.name"
+                   class="w-full h-full object-cover"
+                   (error)="onImageError($event)">
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div>
+                <div class="text-sm font-medium text-gray-800">{{ product.name }}</div>
+                <div class="text-sm text-gray-600">{{ product.description }}</div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm text-gray-800">{{ product.category }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm text-gray-800">{{ product.brand || 'N/A' }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm font-semibold text-gray-800">₹{{ product.price | number:'1.0-0' }}</span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-sm" [class]="(product.stock || 0) < 10 ? 'text-red-600 font-medium' : 'text-gray-800'">
+                {{ product.stock || 0 }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                    [ngClass]="{
+                      'bg-green-100 text-green-800': product.status === 'Active',
+                      'bg-yellow-100 text-yellow-800': product.status === 'Inactive',
+                      'bg-red-100 text-red-800': product.status === 'Out of Stock'
+                    }">
+                {{ product.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-2">
+                <button (click)="editProduct(product)"
+                        class="p-2 bg-blue-500/20 backdrop-blur-sm rounded-lg hover:bg-blue-500/30 transition-colors duration-200"
+                        title="Edit Product">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                </button>
+                <button (click)="deleteProduct(toNumber(product.id))"
+                        class="p-2 bg-red-500/20 backdrop-blur-sm rounded-lg hover:bg-red-500/30 transition-colors duration-200"
+                        title="Delete Product">
+                  <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!-- Empty State -->
+    <div *ngIf="filteredProducts.length === 0" class="text-center py-12">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+      </svg>
+      <h3 class="mt-2 text-sm font-medium text-gray-800">No products found</h3>
+      <p class="mt-1 text-sm text-gray-600">Try adjusting your search or filter criteria.</p>
+    </div>
+  </div>
+
+  <!-- Add Product Form Modal -->
+  <div class="modal-overlay" *ngIf="showAddForm" (click)="showAddForm = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Add New Product</h3>
+        <button class="close-btn" (click)="showAddForm = false">&times;</button>
+      </div>
+      <form (ngSubmit)="addProduct()" class="product-form">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" [(ngModel)]="newProduct.name" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select [(ngModel)]="newProduct.category" name="category" required>
+            <option value="">Select Category</option>
+            <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (₹)</label>
+            <input type="number" [(ngModel)]="newProduct.price" name="price" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" [(ngModel)]="newProduct.stock" name="stock" min="0" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="newProduct.description" name="description" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="url" [(ngModel)]="newProduct.image" name="image">
+        </div>
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="showAddForm = false">Cancel</button>
+          <button type="submit" class="submit-btn">Add Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Product Form Modal -->
+  <div class="modal-overlay" *ngIf="showEditForm" (click)="cancelEdit()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Product</h3>
+        <button class="close-btn" (click)="cancelEdit()">&times;</button>
+      </div>
+      <form (ngSubmit)="updateProduct()" class="product-form">
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" [(ngModel)]="editingProduct!.name" name="editName" required>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select [(ngModel)]="editingProduct!.category" name="editCategory" required>
+            <option *ngFor="let category of categories" [value]="category" [selected]="category === editingProduct!.category">
+              {{ category }}
+            </option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Price (₹)</label>
+            <input type="number" [(ngModel)]="editingProduct!.price" name="editPrice" min="0" required>
+          </div>
+          <div class="form-group">
+            <label>Stock</label>
+            <input type="number" [(ngModel)]="editingProduct!.stock" name="editStock" min="0" required>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="cancel-btn" (click)="cancelEdit()">Cancel</button>
+          <button type="submit" class="submit-btn">Update Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

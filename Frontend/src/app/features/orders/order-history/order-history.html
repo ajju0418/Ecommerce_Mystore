@@ -1,0 +1,188 @@
+<app-header></app-header>
+
+<div class="container mx-auto py-10 bg-white font-sans mt-1 shadow-lg rounded-lg p-6">
+  <header class="mb-10 text-center border-b border-gray-300 pb-4">
+    <h1 class="text-3xl font-bold text-black tracking-wide">
+      <i class="bi bi-box-seam-fill mr-4 text-gray-700"></i>Order History
+    </h1>
+    
+    <!-- Order Status Filter -->
+    <div class="mt-6 flex flex-wrap justify-center gap-2">
+      <button 
+        (click)="filterByStatus('all')"
+        [class]="'px-4 py-2 rounded-full text-sm font-medium transition-colors ' + (selectedFilter === 'all' ? 'bg-black text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+        All Orders ({{ orders.length }})
+      </button>
+      <button 
+        (click)="filterByStatus('active')"
+        [class]="'px-4 py-2 rounded-full text-sm font-medium transition-colors ' + (selectedFilter === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+        Active ({{ getActiveOrdersCount() }})
+      </button>
+      <button 
+        (click)="filterByStatus('completed')"
+        [class]="'px-4 py-2 rounded-full text-sm font-medium transition-colors ' + (selectedFilter === 'completed' ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+        Completed ({{ getCompletedOrdersCount() }})
+      </button>
+      <button 
+        (click)="filterByStatus('cancelled')"
+        [class]="'px-4 py-2 rounded-full text-sm font-medium transition-colors ' + (selectedFilter === 'cancelled' ? 'bg-red-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')">
+        Cancelled ({{ getCancelledOrdersCount() }})
+      </button>
+    </div>
+  </header>
+
+  <!-- Order Summary Cards -->
+  <div *ngIf="orders.length > 0" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 rounded-lg shadow-md">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-blue-100 text-sm">Active Orders</p>
+          <p class="text-2xl font-bold">{{ getActiveOrdersCount() }}</p>
+        </div>
+        <i class="bi bi-clock-history text-3xl text-blue-200"></i>
+      </div>
+    </div>
+    
+    <div class="bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-lg shadow-md">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-green-100 text-sm">Completed</p>
+          <p class="text-2xl font-bold">{{ getCompletedOrdersCount() }}</p>
+        </div>
+        <i class="bi bi-check-circle-fill text-3xl text-green-200"></i>
+      </div>
+    </div>
+    
+    <div class="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 rounded-lg shadow-md">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-red-100 text-sm">Cancelled</p>
+          <p class="text-2xl font-bold">{{ getCancelledOrdersCount() }}</p>
+        </div>
+        <i class="bi bi-x-circle-fill text-3xl text-red-200"></i>
+      </div>
+    </div>
+    
+    <div class="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-4 rounded-lg shadow-md">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-100 text-sm">Total Orders</p>
+          <p class="text-2xl font-bold">{{ orders.length }}</p>
+        </div>
+        <i class="bi bi-box-seam-fill text-3xl text-gray-200"></i>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    @if (filteredOrders.length === 0 && orders.length === 0) {
+      <div class="bg-blue-100 text-center mt-10 p-4 rounded text-gray-700">
+        <span>You have not placed any orders yet.</span>
+      </div>
+    } @else if (filteredOrders.length === 0 && selectedFilter !== 'all') {
+      <div class="bg-yellow-100 text-center mt-10 p-4 rounded text-gray-700">
+        <span>No {{ selectedFilter }} orders found.</span>
+        <button (click)="filterByStatus('all')" class="ml-2 text-blue-600 hover:underline">View all orders</button>
+      </div>
+    } @else {
+      @for (order of filteredOrders; track order.id) {
+        <div class="bg-gray-100 mb-4 shadow-sm rounded-lg border border-gray-300 p-6 hover:shadow-md transition-shadow order-card">
+          <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="flex-1 mb-4 md:mb-0">
+              <div
+                class="cursor-pointer hover:text-blue-600 transition-colors duration-200"
+                (click)="viewOrderDetails(order.id)">
+                <h5 class="text-lg font-bold text-black inline">Order #{{ order.id }}</h5>
+                <i class="bi bi-chevron-right ml-2 text-sm"></i>
+              </div>
+
+              <p class="text-sm text-gray-600">Date: {{ order.orderDate | date:'medium' }}</p>
+              <p class="text-sm font-semibold text-gray-700">Total: ₹{{ order.totalAmount.toFixed(2) }}</p>
+              
+              <!-- Order Status Description -->
+              <div class="mt-1">
+                <p class="text-xs text-gray-500">{{ getStatusDescription(order.status) }}</p>
+              </div>
+
+              <!-- Payment Status -->
+              <div class="mt-2 flex items-center gap-2">
+                <span class="text-xs font-medium text-gray-500">Payment:</span>
+                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                  [ngClass]="{
+                    'bg-green-100 text-green-800': order.paymentDetails?.status === 'completed',
+                    'bg-blue-100 text-blue-800': order.paymentDetails?.status === 'processing',
+                    'bg-yellow-100 text-yellow-800': order.paymentDetails?.status === 'pending',
+                    'bg-red-100 text-red-800': order.paymentDetails?.status === 'failed',
+                    'bg-gray-100 text-gray-800': !order.paymentDetails?.status
+                  }">
+                  {{ order.paymentDetails?.status || 'pending' | titlecase }}
+                </span>
+                <span *ngIf="order.paymentDetails?.method" class="text-xs text-gray-500 capitalize">
+                  via {{ order.paymentDetails?.method }}
+                </span>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center gap-2">
+              <!-- Order Status Badge -->
+              <div class="flex items-center gap-2 mb-2">
+                <span class="inline-flex px-3 py-1 text-sm font-semibold rounded-full status-badge"
+                  [ngClass]="{
+                    'bg-yellow-100 text-yellow-800 border border-yellow-300 status-pending': order.status === 'pending' || order.status === 'PENDING',
+                    'bg-blue-100 text-blue-800 border border-blue-300 status-processing': order.status === 'processing' || order.status === 'PROCESSING' || order.status === 'confirmed' || order.status === 'CONFIRMED',
+                    'bg-green-100 text-green-800 border border-green-300': order.status === 'completed' || order.status === 'COMPLETED' || order.status === 'delivered' || order.status === 'DELIVERED',
+                    'bg-red-100 text-red-800 border border-red-300': order.status === 'cancelled' || order.status === 'CANCELLED' || order.status === 'failed' || order.status === 'FAILED',
+                    'bg-purple-100 text-purple-800 border border-purple-300 status-shipped': order.status === 'shipped' || order.status === 'SHIPPED',
+                    'bg-indigo-100 text-indigo-800 border border-indigo-300': order.status === 'paid' || order.status === 'PAID'
+                  }">
+                  <i class="bi mr-1"
+                    [ngClass]="{
+                      'bi-clock-history': order.status === 'pending' || order.status === 'PENDING',
+                      'bi-gear-fill': order.status === 'processing' || order.status === 'PROCESSING',
+                      'bi-check-circle-fill': order.status === 'completed' || order.status === 'COMPLETED' || order.status === 'delivered' || order.status === 'DELIVERED' || order.status === 'confirmed' || order.status === 'CONFIRMED',
+                      'bi-x-circle-fill': order.status === 'cancelled' || order.status === 'CANCELLED' || order.status === 'failed' || order.status === 'FAILED',
+                      'bi-truck': order.status === 'shipped' || order.status === 'SHIPPED',
+                      'bi-credit-card-fill': order.status === 'paid' || order.status === 'PAID'
+                    }"></i>
+                  {{ getStatusDisplayText(order.status) }}
+                </span>
+              </div>
+
+              <div class="flex gap-2">
+                <!-- Track Order Button - Only show for non-cancelled orders -->
+                <button *ngIf="!isOrderCancelled(order.status)"
+                  (click)="trackOrder(order.id)"
+                  class="bg-black hover:bg-gray-800 text-white font-semibold py-2 px-4 rounded transition-colors text-sm action-button">
+                  <i class="bi bi-geo-alt-fill mr-1"></i>Track Order
+                </button>
+
+                <!-- Cancel Order Button - Only show for pending/processing orders -->
+                <button *ngIf="canCancelOrder(order.status)"
+                  (click)="cancelOrder(order.id)"
+                  class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition-colors text-sm action-button">
+                  <i class="bi bi-x-circle mr-1"></i>Cancel
+                </button>
+
+                <!-- Reorder Button - Show for completed/delivered orders -->
+                <button *ngIf="canReorder(order.status)"
+                  (click)="reorderItems(order)"
+                  class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded transition-colors text-sm action-button">
+                  <i class="bi bi-arrow-repeat mr-1"></i>Reorder
+                </button>
+
+                <!-- Payment Info Button -->
+                <button *ngIf="order.paymentDetails?.transactionId"
+                  (click)="viewPaymentDetails(order)"
+                  class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition-colors text-sm action-button">
+                  <i class="bi bi-credit-card mr-1"></i>Payment Info
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    }
+  </section>
+</div>
+
+<app-footer></app-footer>

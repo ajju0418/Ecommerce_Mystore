@@ -1,0 +1,175 @@
+<app-header></app-header>
+<div class="product-list-container">
+  <!-- Mobile filter toggle -->
+  <button class="mobile-filter-toggle" (click)="toggleSidebar()">
+    <span>Filters</span>
+  </button>
+
+  <div class="main-content">
+    <!-- Sidebar -->
+    <aside class="sidebar" [class.open]="sidebarOpen">
+      <div class="filters-header">
+        <h2>Filters</h2>
+        <button class="clear-all" (click)="clearAllFilters()">CLEAR ALL</button>
+      </div>
+
+      <!-- Categories -->
+      <div class="filter-section">
+        <div class="filter-header">
+          <h3>CATEGORIES</h3>
+        </div>
+        <div class="filter-options">
+          <div *ngFor="let category of categories" class="filter-option">
+            <input type="checkbox" 
+                   [id]="'cat-' + category"
+                   [checked]="selectedCategories.includes(category)"
+                   (change)="onCategoryChange(category, $event.target.checked)">
+            <label [for]="'cat-' + category">{{ category }}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Price -->
+      <div class="filter-section">
+        <div class="filter-header">
+          <h3>PRICE</h3>
+        </div>
+        <div class="price-range">
+          <div class="price-slider">
+            <input type="range" 
+                   [(ngModel)]="minPrice" 
+                   [min]="0" 
+                   [max]="1000" 
+                   (ngModelChange)="onPriceChange()"
+                   class="slider">
+            <input type="range" 
+                   [(ngModel)]="maxPrice" 
+                   [min]="0" 
+                   [max]="1000" 
+                   (ngModelChange)="onPriceChange()"
+                   class="slider">
+          </div>
+          <div class="price-display">
+            <span>₹{{ minPrice }}</span>
+            <span>to</span>
+            <span>₹{{ maxPrice }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Brand -->
+      <div class="filter-section">
+        <div class="filter-header">
+          <h3>BRAND</h3>
+        </div>
+        <div class="brand-search">
+          <input type="text" 
+                 placeholder="Search Brand" 
+                 [(ngModel)]="brandSearchTerm"
+                 class="search-input">
+        </div>
+        <div class="filter-options scrollable">
+          <div *ngFor="let brand of getFilteredBrands()" class="filter-option">
+            <input type="checkbox" 
+                   [id]="'brand-' + brand"
+                   [checked]="selectedBrands.includes(brand)"
+                   (change)="onBrandChange(brand, $event.target.checked)">
+            <label [for]="'brand-' + brand">{{ brand }}</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer Ratings -->
+      <div class="filter-section">
+        <div class="filter-header">
+          <h3>CUSTOMER RATINGS</h3>
+        </div>
+        <div class="filter-options">
+          <div *ngFor="let rating of ratings" class="filter-option rating-option">
+            <input type="checkbox" 
+                   [id]="'rating-' + rating.value"
+                   [checked]="selectedRatings.includes(rating.value)"
+                   (change)="onRatingChange(rating.value, $event.target.checked)">
+            <label [for]="'rating-' + rating.value" class="rating-label">
+              <div class="stars">
+                <span *ngFor="let star of rating.stars" class="star filled">★</span>
+                <span *ngFor="let star of rating.emptyStars" class="star">★</span>
+              </div>
+              <span class="rating-text">{{ rating.text }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Discount -->
+      <div class="filter-section">
+        <div class="filter-header">
+          <h3>DISCOUNT</h3>
+        </div>
+        <div class="filter-options">
+          <div *ngFor="let discount of discounts" class="filter-option">
+            <input type="checkbox" 
+                   [id]="'discount-' + discount.value"
+                   [checked]="selectedDiscounts.includes(discount.value)"
+                   (change)="onDiscountChange(discount.value, $event.target.checked)">
+            <label [for]="'discount-' + discount.value">{{ discount.label }}</label>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main content area -->
+    <main class="content">
+      <!-- Top bar -->
+      <div class="top-bar">
+        <div class="results-count">
+          {{ filteredProducts.length }} products found
+        </div>
+        <div class="sort-controls">
+          <select [(ngModel)]="sortBy" (ngModelChange)="onSortChange()" class="sort-select">
+            <option value="popular">Sort by Popular</option>
+            <option value="newest">Sort by Newest</option>
+            <option value="price-low">Price: Low to High</option>
+            <option value="price-high">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loading state -->
+      <div *ngIf="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading products...</p>
+      </div>
+
+      <!-- Product grid -->
+      <div *ngIf="!loading" class="product-grid">
+        <div *ngFor="let product of filteredProducts" 
+             class="product-card" 
+             (click)="onProductClick(product.id)">
+          <div class="product-image">
+            <img [src]="product.imageUrl" [alt]="product.name">
+          </div>
+          <div class="product-info">
+            <div class="category">{{ product.category }}</div>
+            <h3 class="product-name">{{ product.name }}</h3>
+            <div class="price">${{ product.price.toFixed(2) }}</div>
+            <div class="rating">
+              <div class="stars">
+                <span *ngFor="let star of getStars(product.rating)" 
+                      class="star" 
+                      [class.filled]="star === 'filled'">★</span>
+              </div>
+              <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!loading && filteredProducts.length === 0" class="empty-state">
+        <p>No products found matching your criteria.</p>
+      </div>
+    </main>
+  </div>
+</div>
+<app-footer></app-footer>

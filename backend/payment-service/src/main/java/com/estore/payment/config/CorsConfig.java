@@ -1,0 +1,1 @@
+// CORS is now handled centrally by API Gateway - no individual service CORS config needed

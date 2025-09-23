@@ -1,0 +1,202 @@
+.track-order-container {
+  min-height: 100vh;
+  background: var(--bg-secondary);
+  padding: 40px 20px;
+}
+
+.track-order-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.track-header {
+  background: var(--bg-tertiary);
+  padding: 32px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.track-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.track-header i {
+  color: var(--accent-color);
+}
+
+.order-info {
+  padding: 32px;
+  text-align: center;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.order-info h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 16px 0;
+}
+
+.order-info span {
+  color: var(--text-secondary);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-processing {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-message {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
+}
+
+.tracking-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 32px;
+  gap: 0;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1;
+}
+
+.step-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+  font-size: 18px;
+  transition: all 0.3s ease;
+}
+
+.step-circle.completed {
+  background: var(--success-color);
+  border-color: var(--success-color);
+  color: white;
+}
+
+.step-label {
+  margin-top: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border-color);
+  margin: 0 24px;
+  transition: all 0.3s ease;
+}
+
+.step-line.completed {
+  background: var(--success-color);
+}
+
+.cancelled-message {
+  padding: 48px 32px;
+  text-align: center;
+}
+
+.cancelled-icon {
+  font-size: 64px;
+  color: var(--error-color);
+  margin-bottom: 16px;
+}
+
+.cancelled-message h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--error-color);
+  margin: 0 0 12px 0;
+}
+
+.cancelled-message p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .track-order-container {
+    padding: 20px 16px;
+  }
+  
+  .track-header {
+    padding: 24px 20px;
+  }
+  
+  .track-header h1 {
+    font-size: 24px;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .order-info {
+    padding: 24px 20px;
+  }
+  
+  .tracking-progress {
+    padding: 32px 20px;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .step-line {
+    width: 2px;
+    height: 24px;
+    margin: 0;
+  }
+  
+  .cancelled-message {
+    padding: 32px 20px;
+  }
+}

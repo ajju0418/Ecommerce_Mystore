@@ -1,0 +1,74 @@
+<header class="main-header">
+  <div class="header-container">
+    <div class="header-content">
+
+      <!-- Logo Section -->
+      <div class="logo-section">
+        <a routerLink="/home" class="logo-link">
+          <i class="bi bi-bag-check-fill"></i>
+          <span class="fw-bold fs-3">MyStore</span>
+        </a>
+      </div>
+
+      <!-- Navigation -->
+      <nav>
+        <ul class="nav-list">
+          <li><a *ngIf="router.url !== '/home'"  routerLink="/home" class="nav-link home-link">Home</a></li>
+          <li><a routerLink="/products" class="nav-link">Men's</a></li>
+          <li><a routerLink="/products" class="nav-link">Women's</a></li>
+          <li><a routerLink="/products-page" class="nav-link">Kids</a></li>
+          <li><a routerLink="/products-page" class="nav-link">Accessories</a></li>
+          <li><a routerLink="/deals-of-the-day" class="nav-link deals-link">Deals of the Day</a></li>
+        </ul>
+      </nav>
+
+      <!-- Right Section -->
+      <div class="header-actions">
+        <!-- Admin button for landing page -->
+      
+
+      
+
+        <!-- Auth buttons for non-logged-in users (not on landing page) -->
+        <div *ngIf="!currentUser " class="auth-buttons">
+          <a routerLink="/login" class="btn btn-secondary">Login</a>
+          <a routerLink="/register" class="btn btn-primary">Register</a>
+        </div>
+
+        <!-- User actions for logged in users -->
+        <div *ngIf="currentUser" class="user-actions">
+          <a routerLink="/home/cart" class="cart-link">
+            <i class="bi bi-cart2"></i>
+            <span class="cart-count">{{ cartCount }}</span>
+          </a>
+          
+          <a routerLink="/profile" class="profile-link">
+            <i class="bi bi-person-circle"></i>
+          </a>
+          
+          <div class="user-dropdown-container">
+            <button class="user-greeting" (click)="toggleUserDropdown()">
+              <span>Hi, {{ currentUser.username || 'User' }}</span>
+              <i class="bi bi-chevron-down"></i>
+            </button>
+            <div *ngIf="showUserDropdown" class="user-dropdown" (mouseleave)="hideUserDropdown()">
+              <a routerLink="/profile" class="dropdown-item" (click)="hideUserDropdown()">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+              </a>
+              <a routerLink="/order-history" class="dropdown-item" (click)="hideUserDropdown()">
+                <i class="bi bi-clock-history"></i>
+                <span>Order History</span>
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-item" (click)="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

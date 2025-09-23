@@ -1,0 +1,11 @@
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\repository\ProductRepository.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\ProductServiceApplication.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\service\DataInitializationService.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\service\ProductFilterService.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\controller\ProductController.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\service\ProductService.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\ProductServiceHealthController.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\controller\ProductFilterController.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\entity\Product.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\service\ProductDataInitializationService.java
+D:\Ecommerce-Project\backend\product-service\src\main\java\com\estore\product\service\BrandProductDataInitializer.java

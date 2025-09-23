@@ -1,0 +1,47 @@
+<div class="admin-orders">
+  <h2>All Orders</h2>
+  <div *ngIf="loading">Loading orders...</div>
+  <div *ngIf="error" class="error">{{ error }}</div>
+  <table *ngIf="!loading && orders.length > 0" class="orders-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>User ID</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let order of orders">
+        <td>{{ order.id }}</td>
+        <td>{{ order.customerInfo.contact }}</td>
+        <td>₹{{ order.totalAmount }}</td>
+        <td>{{ order.status }}</td>
+        <td>{{ order.orderDate | date:'short' }}</td>
+        <td>
+          <button (click)="viewOrderDetails(order)">View Details</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div *ngIf="!loading && orders.length === 0">No orders found.</div>
+
+  <div *ngIf="selectedOrder" class="order-details-modal">
+    <h3>Order Details</h3>
+    <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
+    <p><strong>User ID:</strong> {{ selectedOrder.customerInfo.contact }}</p>
+    <p><strong>Total Amount:</strong> ₹{{ selectedOrder.totalAmount }}</p>
+    <p><strong>Status:</strong> {{ selectedOrder.status }}</p>
+    <p><strong>Date:</strong> {{ selectedOrder.orderDate | date:'full' }}</p>
+    <h4>Items:</h4>
+    <ul>
+      <li *ngFor="let item of selectedOrder.items">
+        {{ item.name }} (x{{ item.quantity }}) - ₹{{ item.price }}
+      </li>
+    </ul>
+    <button (click)="closeOrderDetails()">Close</button>
+  </div>
+</div>
+

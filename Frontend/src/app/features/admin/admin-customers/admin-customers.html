@@ -1,0 +1,166 @@
+<div class="admin-customers">
+  <div class="customers-header">
+    <div class="flex justify-between items-center">
+      <div>
+        <h2>Customer Management</h2>
+        <p>Manage customers and their order history</p>
+      </div>
+      <div class="stats-summary">
+        <div class="stat-item">
+          <span class="stat-number">{{ customers.length }}</span>
+          <span class="stat-label">Total Customers</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number">{{ getActiveCustomers() }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="customers-card">
+    <div class="card-header">
+      <h3>Customer List</h3>
+      <div class="header-actions">
+        <button class="export-btn">
+          <i class="bi bi-download mr-1"></i>
+          Export
+        </button>
+      </div>
+    </div>
+    
+    <div class="table-container">
+      <table class="customers-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Contact Info</th>
+            <th>Status</th>
+            <th>Join Date</th>
+            <th>Orders</th>
+            <th>Total Spent</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let customer of customers; let i = index">
+            <td>
+              <div class="customer-cell">
+                <div class="customer-avatar">{{ customer.name.charAt(0) }}</div>
+                <div class="customer-details">
+                  <div class="customer-name">{{ customer.name }}</div>
+                  <div class="customer-id">ID: {{ customer.id }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div class="contact-info">
+                <div class="email">{{ customer.email }}</div>
+                <div class="phone">{{ customer.phone }}</div>
+              </div>
+            </td>
+            <td>
+              <span class="status-badge" [class]="getStatusClass(customer.status)">
+                {{ customer.status }}
+              </span>
+            </td>
+            <td class="date-cell">{{ customer.joinDate }}</td>
+            <td class="orders-cell">
+              <span class="orders-count">{{ customer.orders }}</span>
+            </td>
+            <td class="amount-cell">
+              <strong>₹{{ customer.totalSpent.toLocaleString() }}</strong>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn view" (click)="viewDetails(customer)" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="action-btn edit" (click)="editCustomer(customer)" title="Edit Customer">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="action-btn delete" (click)="deleteCustomer(customer)" title="Delete Customer">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="customers.length === 0">
+            <td colspan="7" class="empty-state">
+              <i class="bi bi-people" style="font-size: 2rem; display: block; margin-bottom: 10px; color: #9ca3af;"></i>
+              No customers found
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Details Modal -->
+  <div *ngIf="showDetailsModal" class="modal-overlay" (click)="closeDetailsModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Customer Details</h3>
+        <button class="close-btn" (click)="closeDetailsModal()">&times;</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedCustomer">
+        <div class="detail-row">
+          <strong>Name:</strong> {{ selectedCustomer.name }}
+        </div>
+        <div class="detail-row">
+          <strong>Email:</strong> {{ selectedCustomer.email }}
+        </div>
+        <div class="detail-row">
+          <strong>Phone:</strong> {{ selectedCustomer.phone }}
+        </div>
+        <div class="detail-row">
+          <strong>Status:</strong> {{ selectedCustomer.status }}
+        </div>
+        <div class="detail-row">
+          <strong>Join Date:</strong> {{ selectedCustomer.joinDate }}
+        </div>
+        <div class="detail-row">
+          <strong>Total Orders:</strong> {{ selectedCustomer.orders }}
+        </div>
+        <div class="detail-row">
+          <strong>Total Spent:</strong> ₹{{ selectedCustomer.totalSpent.toLocaleString() }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div *ngIf="showEditModal" class="modal-overlay" (click)="closeEditModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Edit Customer</h3>
+        <button class="close-btn" (click)="closeEditModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input [(ngModel)]="editForm.name" class="form-input" type="text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input [(ngModel)]="editForm.email" class="form-input" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input [(ngModel)]="editForm.phone" class="form-input" type="text">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select [(ngModel)]="editForm.status" class="form-input">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+          <button class="btn btn-primary" (click)="saveCustomer()">Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

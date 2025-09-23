@@ -1,0 +1,26 @@
+<div class="admin-dashboard">
+  <div class="admin-sidebar">
+    <app-admin-sidebar (sectionChange)="setActiveSection($event)"></app-admin-sidebar>
+  </div>
+  
+  <div class="admin-main">
+    <header class="admin-header">
+      <div class="header-left">
+        <h1>Admin Dashboard</h1>
+        <p>Manage your store operations</p>
+      </div>
+      <div class="header-right">
+        <div class="admin-info">
+          <span>Admin</span>
+        </div>
+        <button (click)="goBackToStore()" class="btn btn-secondary">
+          Back to Store
+        </button>
+      </div>
+    </header>
+    
+    <main class="admin-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

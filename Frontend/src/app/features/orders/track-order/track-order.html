@@ -1,0 +1,59 @@
+
+<div class="track-order-container">
+  <div class="track-order-card">
+    <div class="track-header">
+      <h1><i class="bi bi-geo-alt-fill"></i>Track Your Order</h1>
+    </div>
+
+    <div class="order-info">
+      <h2>Order ID: <span>{{ orderId }}</span></h2>
+      <div class="status-badge" [ngClass]="{
+        'status-pending': trackingStatus === 'pending',
+        'status-processing': trackingStatus === 'processing',
+        'status-completed': trackingStatus === 'completed',
+        'status-cancelled': trackingStatus === 'cancelled'
+      }">
+        {{ trackingStatus | titlecase }}
+      </div>
+      <p class="status-message">{{ getStatusMessage() }}</p>
+    </div>
+
+    <div class="tracking-progress" *ngIf="trackingStatus !== 'cancelled'">
+      <!-- Step 1: Ordered -->
+      <div class="step">
+        <div class="step-circle" [ngClass]="{'completed': isStepCompleted('pending')}">
+          <i class="bi bi-check-lg"></i>
+        </div>
+        <span class="step-label">Ordered</span>
+      </div>
+      
+      <div class="step-line" [ngClass]="{'completed': isStepCompleted('processing')}"></div>
+      
+      <!-- Step 2: Processing -->
+      <div class="step">
+        <div class="step-circle" [ngClass]="{'completed': isStepCompleted('processing')}">
+          <i class="bi bi-gear-fill"></i>
+        </div>
+        <span class="step-label">Processing</span>
+      </div>
+      
+      <div class="step-line" [ngClass]="{'completed': isStepCompleted('completed')}"></div>
+      
+      <!-- Step 3: Delivered -->
+      <div class="step">
+        <div class="step-circle" [ngClass]="{'completed': isStepCompleted('completed')}">
+          <i class="bi bi-truck"></i>
+        </div>
+        <span class="step-label">Delivered</span>
+      </div>
+    </div>
+
+    <div class="cancelled-message" *ngIf="trackingStatus === 'cancelled'">
+      <div class="cancelled-icon">
+        <i class="bi bi-x-circle-fill"></i>
+      </div>
+      <h3>Order Cancelled</h3>
+      <p>This order has been cancelled and will not be processed.</p>
+    </div>
+  </div>
+</div>

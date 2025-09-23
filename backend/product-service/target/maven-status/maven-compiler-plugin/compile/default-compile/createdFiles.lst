@@ -1,0 +1,10 @@
+com\estore\product\service\ProductDataInitializationService.class
+com\estore\product\service\ProductFilterService.class
+com\estore\product\entity\Product.class
+com\estore\product\service\BrandProductDataInitializer.class
+com\estore\product\controller\ProductController.class
+com\estore\product\ProductServiceHealthController.class
+com\estore\product\repository\ProductRepository.class
+com\estore\product\ProductServiceApplication.class
+com\estore\product\controller\ProductFilterController.class
+com\estore\product\service\ProductService.class
