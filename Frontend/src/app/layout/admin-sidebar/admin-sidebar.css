@@ -2,25 +2,46 @@
   height: 100vh;
   background: var(--bg-primary);
   padding: 0;
+  color: var(--text-primary);
 }
 
 .sidebar-header {
   padding: 20px;
-  border-bottom: 1px solid var(--border-light);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .logo {
-  font-size: 18px;
-  font-weight: 600;
-  margin: 0;
-  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.logo-icon {
+  color: #ff3f6c;
+  font-size: 24px;
+}
+
+.logo-text {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .sidebar-nav {
   padding: 16px 0;
+}
+
+.nav-section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0 0 12px 20px;
 }
 
 .nav-menu {
@@ -46,17 +67,28 @@
   text-align: left;
   cursor: pointer;
   font-size: 14px;
+  position: relative;
 }
 
 .nav-link:hover {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
 }
 
 .nav-link.active {
-  background: var(--bg-tertiary);
+  background: var(--bg-secondary);
   color: var(--text-primary);
   font-weight: 500;
+}
+
+.nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: #ff3f6c;
 }
 
 .nav-icon {
@@ -68,6 +100,7 @@
 .icon {
   width: 16px;
   height: 16px;
+  stroke: currentColor;
 }
 
 .nav-label {
@@ -76,7 +109,7 @@
 }
 
 .nav-badge {
-  background: var(--error-color);
+  background: #EF4444;
   color: white;
   font-size: 12px;
   font-weight: 600;

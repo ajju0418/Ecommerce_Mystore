@@ -50,6 +50,22 @@ public class ProductManagementService {
         ).getBody();
     }
 
+    public Object deleteProduct(Long productId) {
+        String productServiceUrl = getServiceUrl("product-service");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        
+        HttpEntity<Void> request = new HttpEntity<>(headers);
+        
+        return restTemplate.exchange(
+            productServiceUrl + "/api/products/" + productId,
+            HttpMethod.DELETE,
+            request,
+            Object.class
+        ).getBody();
+    }
+
     private String getServiceUrl(String serviceName) {
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName);
         if (instances.isEmpty()) {

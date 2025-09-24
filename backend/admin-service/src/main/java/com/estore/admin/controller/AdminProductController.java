@@ -43,6 +43,16 @@ public class AdminProductController {
         }
     }
 
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<Object> deleteProduct(@PathVariable Long productId) {
+        try {
+            Object result = productManagementService.deleteProduct(productId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Admin Product Management Service is running");

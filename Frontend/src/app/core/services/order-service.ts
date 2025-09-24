@@ -144,6 +144,30 @@ export class OrderService {
     return this.orders$;
   }
 
+  // Admin method to get all orders from all users
+  getAllOrders(): Observable<Order[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/all`)
+      .pipe(
+        retry(2),
+        map((orders: any[]) => {
+          // Map backend data to frontend format
+          return (orders || []).map(order => ({
+            ...order,
+            id: order.orderId || order.id,
+            items: (order.orderItems || []).map((item: any) => ({
+              id: item.productId,
+              name: item.productName,
+              price: item.price,
+              quantity: item.quantity,
+              imageUrl: item.imageUrl || 'assets/default.jpg',
+              rating: item.rating || 0
+            }))
+          }));
+        }),
+        catchError(this.handleError.bind(this))
+      );
+  }
+
   getOrderById(id: string): Order | undefined {
     return this.ordersSubject.value.find(order => order.id === id);
   }
