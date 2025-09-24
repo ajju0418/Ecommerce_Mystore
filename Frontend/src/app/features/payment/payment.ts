@@ -3,12 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
 import { OrderService } from '../../core/services/order-service';
-import { cartService } from '../../core/services/cart-Service';
 import { UserService } from '../../core/services/user-service';
 import { PaymentService, PaymentRequest } from '../../core/services/payment.service';
 import { ProductListItem } from '../../core/models/product.types';
 import { Header } from '../../layout/header/header';
 import { Footer } from '../../layout/footer/footer';
+import { CartService } from '../../core/services/cart-Service';
 
 
 @Component({
@@ -50,7 +50,7 @@ export class PaymentComponent implements OnInit {
 
   constructor(
     private orderService: OrderService, 
-    private cartService: cartService,
+    private cartService: CartService,
     private userService: UserService,
     private paymentService: PaymentService,
     private router: Router

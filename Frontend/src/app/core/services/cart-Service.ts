@@ -10,7 +10,7 @@ import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
-export class cartService {
+export class CartService {
   private apiUrl = environment.apiUrl + '/cart';
   private cartItemsSubject = new BehaviorSubject<ProductListItem[]>([]);
   cartItems$: Observable<ProductListItem[]> = this.cartItemsSubject.asObservable();

@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Header } from "../../../layout/header/header";
 import { Footer } from "../../../layout/footer/footer";
+import { Productservice } from '../../../core/services/productservice';
+import { CartService } from '../../../core/services/cart-Service';
+import { ProductListItem } from '../../../core/models/product.types';
 
 interface ProductDetail {
   id: number;
@@ -35,7 +38,9 @@ export class ProductDetailComponent implements OnInit {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private productService: Productservice,
+    private cartService: CartService
   ) {}
 
   ngOnInit(): void {
@@ -45,48 +50,32 @@ export class ProductDetailComponent implements OnInit {
 
   loadProduct(id: string): void {
     this.loading = true;
-    
-    // TODO: Replace with actual backend service call
-    // this.productService.getProductById(+id).subscribe(product => {
-    //   this.product = product;
-    //   this.selectedColor = product.colors[0]?.name || '';
-    //   this.selectedSize = product.sizes[0] || '';
-    //   this.loading = false;
-    // });
-    
-    // Mock data for now
-    setTimeout(() => {
-      this.product = this.getMockProduct(+id);
-      this.selectedColor = this.product.colors[0]?.name || '';
-      this.selectedSize = this.product.sizes[0] || '';
-      this.loading = false;
-    }, 500);
-  }
-
-  getMockProduct(id: number): ProductDetail {
-    return {
-      id,
-      name: 'Air Max 270',
-      brand: 'Nike',
-      price: 150.00,
-      rating: 4.5,
-      reviewCount: 128,
-      images: [
-        'assets/product-shirts/image1.jpg',
-        'assets/product-shirts/image2.jpg',
-        'assets/product-shirts/image3.jpg',
-        'assets/product-shirts/image4.jpg'
-      ],
-      colors: [
-        { name: 'Black', value: '#000000' },
-        { name: 'White', value: '#FFFFFF' },
-        { name: 'Blue', value: '#0066CC' },
-        { name: 'Red', value: '#CC0000' }
-      ],
-      sizes: ['7', '8', '9', '10', '11', '12'],
-      description: 'The Nike Air Max 270 delivers visible Air cushioning under every step. Inspired by the Air Max 93 and Air Max 180, it features Nike\'s largest heel Air unit yet for a super-soft ride that feels as impossible as it looks.',
-      deliveryInfo: 'Free delivery on orders over $30'
-    };
+    this.productService.getProductById(id).subscribe({
+      next: (product: any) => {
+        // Map backend product to ProductDetail if needed
+        this.product = {
+          id: product.id,
+          name: product.name,
+          brand: product.brand,
+          price: product.price,
+          rating: product.rating,
+          reviewCount: product.reviewCount,
+          images: product.images || [],
+          colors: product.colors || [],
+          sizes: product.sizes || [],
+          description: product.description || '',
+          deliveryInfo: product.deliveryInfo || ''
+        };
+        this.selectedColor = this.product.colors[0]?.name || '';
+        this.selectedSize = this.product.sizes[0] || '';
+        this.loading = false;
+      },
+      error: (error: any) => {
+        console.error('Failed to load product:', error);
+        this.product = null;
+        this.loading = false;
+      }
+    });
   }
 
   selectImage(index: number): void {
@@ -106,22 +95,30 @@ export class ProductDetailComponent implements OnInit {
       alert('Please select a size');
       return;
     }
-    
-    // TODO: Implement add to cart functionality
-    // this.cartService.addToCart({
-    //   productId: this.product!.id,
-    //   color: this.selectedColor,
-    //   size: this.selectedSize,
-    //   quantity: this.quantity
-    // });
-    
+    // Integrate with CartService
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const userId = currentUser?.id;
+    if (!userId) {
+      alert('User not logged in');
+      return;
+    }
+                const cartItem: ProductListItem = {
+          id: this.product!.id.toString(),
+          name: this.product!.name,
+          price: this.product!.price,
+          imageUrl: this.product!.images[0],
+          rating: this.product!.rating,
+          color: this.selectedColor,
+          size: this.selectedSize,
+          quantity: this.quantity
+        };
+        this.cartService.addToCart(cartItem, userId);
     console.log('Added to cart:', {
-      product: this.product,
+      productId: this.product!.id,
       color: this.selectedColor,
       size: this.selectedSize,
       quantity: this.quantity
     });
-    
     alert('Product added to cart!');
   }
 

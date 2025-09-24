@@ -14,13 +14,8 @@ public class BrandProductDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        if (productRepository.count() < 100) { // Only seed if not already present
-            addBrandProducts("H&M");
-            addBrandProducts("Zara");
-            addBrandProducts("Levi's");
-            addBrandProducts("Jack & Jones");
-            addBrandProducts("Roadster");
-        }
+        // Remove static brand product initialization
+        // No brand products will be seeded automatically
     }
 
     private void addBrandProducts(String brand) {

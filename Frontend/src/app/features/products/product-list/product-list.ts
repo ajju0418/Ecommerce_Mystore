@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Header } from '../../../layout/header/header';
 import { Footer } from '../../../layout/footer/footer';
+import { Productservice } from '../../../core/services/productservice';
 
 interface Product {
   id: number;
@@ -60,7 +61,7 @@ export class ProductListComponent implements OnInit {
   // Mobile sidebar
   sidebarOpen = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private productService: Productservice) {}
 
   ngOnInit(): void {
     this.loadProducts();
@@ -68,20 +69,28 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading = true;
-    
-    // TODO: Replace with actual backend service call
-    // this.productService.getProducts().subscribe(products => {
-    //   this.products = products;
-    //   this.applyFilters();
-    //   this.loading = false;
-    // });
-    
-    // Mock data for now
-    setTimeout(() => {
-      this.products = this.getMockProducts();
-      this.applyFilters();
-      this.loading = false;
-    }, 500);
+    this.productService.getProductList().subscribe({
+      next: (products) => {
+        this.products = products.map(p => ({
+          id: +p.id, // convert string to number
+          name: p.name ?? '',
+          category: p.category ?? '',
+          brand: p.brand ?? '',
+          price: p.price ?? 0,
+          imageUrl: p.imageUrl ?? '',
+          rating: p.rating ?? 0,
+          reviewCount: p.reviewCount ?? 0
+        }));
+        this.applyFilters();
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load products:', error);
+        this.products = [];
+        this.filteredProducts = [];
+        this.loading = false;
+      }
+    });
   }
 
   getMockProducts(): Product[] {

@@ -5,13 +5,6 @@ import { FormsModule } from '@angular/forms';
 import { Productservice as AdminProductService, Product } from '../../../core/services/productservice';
 import { ProductListItem } from '../../../core/models/product.types';
 
-interface ProductPage {
-  content: Product[];
-  totalElements: number;
-  totalPages: number;
-  size: number;
-  number: number;
-}
 
 @Component({
   selector: 'app-admin-products',
@@ -59,7 +52,7 @@ export class AdminProducts implements OnInit {
       id: product.id && !isNaN(Number(product.id)) ? String(product.id) : '', // Ensure id is a valid string
       name: product.name,
       price: product.price,
-      imageUrl: product.imageUrl ?? 'https://via.placeholder.com/48x48?text=No+Image',
+      imageUrl: product.imageUrl ?? 'assets/images/no-image.png',
       rating: product.rating ?? 0,
       category: product.category,
       description: product.description,
@@ -86,13 +79,10 @@ export class AdminProducts implements OnInit {
   }
 
   applyFilters() {
-    // Filter products from backend response only
     if (this.selectedCategory) {
-      // TODO: Implement getProductsByCategory in service
-      this.adminProductService.getProducts().subscribe({
-        next: (products: Product[]) => {
-          const listItems = products.filter(p => p.category === this.selectedCategory).map(this.mapProductToListItem);
-          this.filteredProducts = listItems.filter((product: ProductListItem) => {
+      this.adminProductService.getProductsByCategory(this.selectedCategory).subscribe({
+        next: (products: ProductListItem[]) => {
+          this.filteredProducts = products.filter((product: ProductListItem) => {
             const matchesSearch =
               !this.searchTerm ||
               product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -221,7 +211,7 @@ export class AdminProducts implements OnInit {
 
   onImageError(event: Event) {
     const img = event.target as HTMLImageElement;
-    img.src = 'https://via.placeholder.com/48x48?text=No+Image';
+    img.src = 'assets/images/no-image.png';
   }
 
   toNumber(value: any): number {

@@ -12,7 +12,6 @@ import { AdminDashboardOverview } from './features/admin/admin-dashboard-overvie
 import { AdminProducts } from './features/admin/admin-products/admin-products';
 import { AdminSales } from './features/admin/admin-sales/admin-sales';
 import { AdminCustomers } from './features/admin/admin-customers/admin-customers';
-import { AdminOrders } from './features/admin/admin-orders/admin-orders';
 import { Adminlogin } from './features/auth/adminlogin/adminlogin';
 import { OrderSummaryComponent } from './features/orders/order-summary/order-summary';
 import { OrderHistoryComponent } from './features/orders/order-history/order-history';
@@ -65,7 +64,6 @@ export const routes: Routes = [
   children: [
     { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
     { path: 'dashboard', component: AdminDashboardOverview },
-    { path: 'orders', component: AdminOrders },
     { path: 'products', component: AdminProducts },
     { path: 'sales', component: AdminSales },
     { path: 'customers', component: AdminCustomers },

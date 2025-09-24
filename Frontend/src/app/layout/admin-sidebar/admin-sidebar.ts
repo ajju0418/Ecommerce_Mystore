@@ -32,10 +32,9 @@ export class AdminSidebar implements OnInit {
 
   menuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'home', route: '/admin/dashboard' },
-    { id: 'orders', label: 'Orders', icon: 'orders', route: '/admin/orders', badge: '0' },
+    { id: 'sales', label: 'sales', icon: 'sales', route: '/admin/sales', badge: '0' },
     { id: 'products', label: 'Products', icon: 'products', route: '/admin/products' },
     { id: 'customers', label: 'Customers', icon: 'reports', route: '/admin/customers' },
-    { id: 'discounts', label: 'Discounts', icon: 'discounts', route: '/admin/discounts' },
     { id: 'admin-list', label: 'Admin List', icon: 'admin-list', route: '/admin/admin-list' },
     { id: 'logout', label: 'Logout', icon: 'logout', route: '/home' }
   ];

@@ -150,7 +150,11 @@ export class AdminDashboardOverview implements OnInit {
 
   private updateStats() {
     const totalSales = this.orders.reduce((sum, order) => sum + order.totalAmount, 0);
-    const uniqueCustomers = new Set(this.orders.map(order => order.customerInfo.email)).size;
+    const uniqueCustomers = new Set(
+      this.orders
+        .filter(order => order && order.customerInfo && order.customerInfo.email)
+        .map(order => order.customerInfo.email)
+    ).size;
 
     this.stats = [
       { title: 'Total Sales', value: `₹${totalSales.toLocaleString()}`, change: '+12.5%', icon: '💰', color: 'bg-green-500' },

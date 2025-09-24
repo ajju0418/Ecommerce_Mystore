@@ -15,5 +15,7 @@ export interface ProductListItem {
   type?: string,
   gender?: string,
   isFavorite?: boolean,
-  reviewCount?: number
+  reviewCount?: number,
+  color?: string,
+  size?: string
 }

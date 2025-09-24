@@ -2,12 +2,12 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { cartService } from '../../../core/services/cart-Service';
 import { OrderService } from '../../../core/services/order-service';
 import { Header } from "../../../layout/header/header";
 import { Footer } from "../../../layout/footer/footer";
 import { ProductListItem } from '../../../core/models/product.types';
 import { Subscription } from 'rxjs';
+import { CartService } from '../../../core/services/cart-Service';
 
 
 @Component({
@@ -31,7 +31,7 @@ export class CartComponent implements OnInit, OnDestroy {
   cartSubscription!: Subscription;
 
   constructor(
-    private cartService: cartService,
+    private cartService: CartService,
     private orderService: OrderService,
     private router: Router
   ) { }
