@@ -94,19 +94,36 @@ export class AdminCustomers implements OnInit {
   saveCustomer() {
     const index = this.customers.findIndex(c => c.id === this.editForm.id);
     if (index !== -1) {
-      this.customers[index] = { ...this.editForm };
+      // Map CustomerData to User
+      const user: User = {
+        id: this.editForm.id,
+        username: this.editForm.name,
+        email: this.editForm.email,
+        phone: this.editForm.phone,
+        gender: 'Other', // Default or fetch from elsewhere
+        password: '', // Leave blank or fetch from elsewhere
+      };
+      this.userService.updateUser(user.id!, user).subscribe({
+        next: () => {
+          this.loadAllCustomersWithStats();
+        },
+        error: (err) => {
+          alert('Failed to update customer: ' + (err?.message || err));
+        }
+      });
     }
     this.closeEditModal();
   }
 
   deleteCustomer(customer: CustomerData) {
     if (confirm(`Delete customer ${customer.name}? This will remove all their order history.`)) {
-      this.customers = this.customers.filter(c => c.id !== customer.id);
-
-      this.orderService.getOrders().subscribe((orders: Order[]) => {
-        const filteredOrders = orders.filter((order: Order) => order.customerInfo.email !== customer.email);
-        localStorage.setItem('orders', JSON.stringify(filteredOrders));
-        window.location.reload();
+      this.userService.deleteUser(customer.id).subscribe({
+        next: () => {
+          this.loadAllCustomersWithStats(); // Refresh list after deletion
+        },
+        error: (err) => {
+          alert('Failed to delete customer: ' + (err?.message || err));
+        }
       });
     }
     this.hideActions();

@@ -22,8 +22,13 @@ export class UserProfile implements OnInit {
 
   ngOnInit() {
     this.user = this.userService.getCurrentUser();
-    if (this.user) {
-      this.editForm = { ...this.user };
+    if (this.user && this.user.id) {
+      this.userService.getUserById(this.user.id).subscribe({
+        next: (user) => {
+          this.user = user;
+          this.editForm = { ...user };
+        }
+      });
     }
   }
 
@@ -35,10 +40,16 @@ export class UserProfile implements OnInit {
   }
 
   saveProfile() {
-    if (this.editForm) {
-      this.userService.updateCurrentUser(this.editForm);
-      this.user = { ...this.editForm };
-      this.editMode = false;
+    if (this.editForm && this.editForm.id) {
+      this.userService.updateUser(this.editForm.id, this.editForm).subscribe({
+        next: (response) => {
+          this.user = { ...this.editForm };
+          this.editMode = false;
+        },
+        error: () => {
+          // Optionally show error message
+        }
+      });
     }
   }
 

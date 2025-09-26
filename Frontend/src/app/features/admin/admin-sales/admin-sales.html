@@ -95,30 +95,36 @@
             </td>
             <td>
               <div style="display: flex; gap: 4px; min-width: 140px;">
-                <!-- Accept/Complete Button -->
+                <!-- Accept Button: only for pending -->
                 <button *ngIf="order.status === 'pending'"
                         (click)="acceptOrder(order)"
                         style="background: #10b981; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; flex: 1;">
                   Accept
                 </button>
+                <!-- Reject Button: for pending and processing -->
+                <button *ngIf="order.status === 'pending' || order.status === 'processing'"
+                        (click)="rejectOrder(order)"
+                        style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; flex: 1;">
+                  Cancel
+                </button>
+                <!-- Complete Button: only for processing -->
                 <button *ngIf="order.status === 'processing'"
                         (click)="completeOrder(order)"
                         style="background: #3b82f6; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; flex: 1;">
                   Complete
                 </button>
-
-                <!-- Reject Button (always visible for pending/processing) -->
-                <button *ngIf="order.status === 'pending' || order.status === 'processing'"
-                        (click)="rejectOrder(order)"
-                        style="background: #ef4444; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; flex: 1;">
-                  Reject
-                </button>
-
-                <!-- Completed Status -->
-                <span *ngIf="order.status === 'completed'"
+                <!-- Completed Status: only for completed -->
+                <span *ngIf="order.status && order.status.toLowerCase() === 'completed'"
                       style="background: #10b981; color: white; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; text-align: center; flex: 1;">
                   Completed
                 </span>
+                <!-- Delete icon: only for completed or cancelled (case-insensitive) -->
+                <button *ngIf="order.status && (order.status.toLowerCase() === 'completed' || order.status.toLowerCase() === 'cancelled')"
+                        (click)="deleteOrder(order)"
+                        style="background: #f59e0b; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; flex: 1;"
+                        title="Delete Order">
+                  <i class="bi bi-trash"></i>
+                </button>
               </div>
             </td>
           </tr>

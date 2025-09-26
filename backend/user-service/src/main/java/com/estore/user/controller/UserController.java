@@ -3,6 +3,7 @@ package com.estore.user.controller;
 import com.estore.user.dto.UserLoginDto;
 import com.estore.user.dto.UserRegistrationDto;
 import com.estore.user.dto.UserResponseDto;
+import com.estore.user.entity.User;
 import com.estore.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,29 @@ public class UserController {
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable Long userId) {
+        try {
+            System.out.println("Attempting to delete user with ID: " + userId);
+            userService.deleteUser(userId);
+            System.out.println("User deleted successfully: " + userId);
+            return ResponseEntity.ok().body("User deleted successfully");
+        } catch (RuntimeException e) {
+            System.err.println("Error deleting user: " + e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
+        try {
+            UserResponseDto response = userService.updateUser(userId, updatedUser);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

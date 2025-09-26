@@ -53,6 +53,26 @@ public class AdminProductController {
         }
     }
 
+    @PostMapping
+    public ResponseEntity<Object> createProduct(@RequestBody Object productDto) {
+        try {
+            Object result = productManagementService.createProduct(productDto);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PutMapping("/{productId}")
+    public ResponseEntity<Object> updateProduct(@PathVariable Long productId, @RequestBody Object productDto) {
+        try {
+            Object result = productManagementService.updateProduct(productId, productDto);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Admin Product Management Service is running");

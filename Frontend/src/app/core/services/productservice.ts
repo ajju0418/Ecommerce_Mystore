@@ -10,8 +10,11 @@ export interface Product {
   name: string;
   description: string;
   price: number;
+  originalPrice?: number;
+  brand?: string;
   category: string;
   stockQuantity: number;
+  quantity?: number;
   collection: string;
   gender: string;
   imageUrl: string;

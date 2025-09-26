@@ -63,4 +63,29 @@ public class UserService {
         return new UserResponseDto(user.getId(), user.getUsername(), 
                                  user.getEmail(), user.getPhone(), user.getGender());
     }
+
+    public void deleteUser(Long userId) {
+        System.out.println("deleteUser called for ID: " + userId);
+        if (!userRepository.existsById(userId)) {
+            System.err.println("User not found with ID: " + userId);
+            throw new RuntimeException("User not found with ID: " + userId);
+        }
+        userRepository.deleteById(userId);
+        System.out.println("User deleted from repository: " + userId);
+    }
+
+    public UserResponseDto updateUser(Long userId, User updatedUser) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        user.setUsername(updatedUser.getUsername());
+        user.setEmail(updatedUser.getEmail());
+        user.setPhone(updatedUser.getPhone());
+        user.setGender(updatedUser.getGender());
+        // Optionally update password if provided
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+        User savedUser = userRepository.save(user);
+        return new UserResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender());
+    }
 }

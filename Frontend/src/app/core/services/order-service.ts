@@ -230,7 +230,7 @@ export class OrderService {
   createOrderWithPayment(items: ProductListItem[], totalAmount: number, customerInfo: any, paymentDetails: PaymentDetails): Observable<any> {
     // First create the order, then process payment
     return this.createOrder(items, totalAmount, customerInfo).pipe(
-      switchMap(orderResponse => {
+      switchMap((orderResponse) => {
         if (!orderResponse.success) {
           return of({ success: false, message: 'Failed to create order' });
         }
@@ -379,6 +379,14 @@ export class OrderService {
       ...order.customerInfo,
       userId: order.userId
     });
+  }
+
+  // Update deleteOrder to handle plain text response from backend
+  deleteOrder(orderId: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${orderId}`, { responseType: 'text' })
+      .pipe(
+        catchError(this.handleError.bind(this))
+      );
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {

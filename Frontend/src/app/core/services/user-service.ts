@@ -89,6 +89,27 @@ export class UserService {
     return user?.token || null;
   }
 
+  deleteUser(userId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${userId}`);
+  }
+
+  updateUser(userId: number, updatedUser: User): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${userId}`, updatedUser);
+  }
+
+  getUserById(userId: number): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/${userId}`);
+  }
+
+  refreshCurrentUserFromBackend(userId: number): void {
+    this.http.get<User>(`${this.apiUrl}/${userId}`).subscribe({
+      next: (user) => {
+        this.currentUserSubject.next(user);
+        localStorage.setItem('currentUser', JSON.stringify(user));
+      }
+    });
+  }
+
   private loadUserFromStorage(): User | null {
     const userJson = localStorage.getItem('currentUser');
     return userJson ? JSON.parse(userJson) : null;

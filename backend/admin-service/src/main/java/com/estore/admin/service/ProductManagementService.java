@@ -66,6 +66,27 @@ public class ProductManagementService {
         ).getBody();
     }
 
+    public Object createProduct(Object productDto) {
+        String productServiceUrl = getServiceUrl("product-service");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> request = new HttpEntity<>(productDto, headers);
+        return restTemplate.postForObject(productServiceUrl + "/api/products", request.getBody(), Object.class);
+    }
+
+    public Object updateProduct(Long productId, Object productDto) {
+        String productServiceUrl = getServiceUrl("product-service");
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Object> request = new HttpEntity<>(productDto, headers);
+        return restTemplate.exchange(
+            productServiceUrl + "/api/products/" + productId,
+            HttpMethod.PUT,
+            request,
+            Object.class
+        ).getBody();
+    }
+
     private String getServiceUrl(String serviceName) {
         List<ServiceInstance> instances = discoveryClient.getInstances(serviceName);
         if (instances.isEmpty()) {

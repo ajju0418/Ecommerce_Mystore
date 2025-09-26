@@ -161,6 +161,13 @@
             <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>Collection</label>
+          <select [(ngModel)]="newProduct.collection" name="collection" required>
+            <option value="">Select Collection</option>
+            <option *ngFor="let col of collections" [value]="col">{{ col }}</option>
+          </select>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>Price (₹)</label>

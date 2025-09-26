@@ -19,9 +19,19 @@ export class AdminSales implements OnInit {
   }
 
   loadOrders() {
-    this.orderService.getOrders().subscribe({
+    this.orderService.getAllOrders().subscribe({
       next: (orders: Order[]) => {
-        this.orders = orders || [];
+        // Map userName to customerInfo.name for template compatibility
+        this.orders = (orders || []).map(order => ({
+          ...order,
+          customerInfo: {
+            ...order.customerInfo,
+            name: order.userName || 'N/A',
+            email: order.userEmail || '',
+            phone: order.userPhone || '',
+            address: order.customerInfo?.address || ''
+          }
+        }));
       },
       error: (error: any) => {
         console.error('Failed to load orders:', error);
@@ -89,6 +99,16 @@ export class AdminSales implements OnInit {
       this.orderService.updateOrderStatus(order.id, 'completed').subscribe({
         next: () => this.loadOrders(),
         error: (error: any) => console.error('Failed to update order status:', error)
+      });
+    }
+  }
+
+  // Update deleteOrder to use correct backend endpoint
+  deleteOrder(order: Order) {
+    if (confirm(`Delete order ${order.id}? This cannot be undone.`) && order.id) {
+      this.orderService.deleteOrder(order.id).subscribe({
+        next: () => this.loadOrders(),
+        error: (error: any) => console.error('Failed to delete order:', error)
       });
     }
   }

@@ -1,5 +1,6 @@
 package com.estore.order.service;
 
+import com.estore.order.client.UserServiceFeignClient;
 import com.estore.order.dto.*;
 
 import com.estore.order.entity.Order;
@@ -7,12 +8,9 @@ import com.estore.order.entity.Order.OrderStatus;
 import com.estore.order.entity.OrderItem;
 import com.estore.order.repository.OrderRepository;
 import com.estore.order.repository.OrderItemRepository;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.client.RestClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,7 +32,7 @@ public class OrderService {
     private OrderItemRepository orderItemRepository;
     
     @Autowired
-    private RestTemplate restTemplate;
+    private UserServiceFeignClient userServiceFeignClient;
 
     @Transactional
     public OrderDto createOrder(CheckoutDto checkoutDto) {
@@ -73,26 +71,17 @@ public class OrderService {
     public OrderDto getOrderByOrderId(String orderId) {
         Order order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
-        
         OrderDto orderDto = convertToDto(order);
-        
-        // Add user details via HTTP call to user service
         try {
-            String userServiceUrl = "http://localhost:9091/api/users/" + order.getUserId();
-            System.out.println("Calling user service: " + userServiceUrl);
-            UserResponseDto user = restTemplate.getForObject(userServiceUrl, UserResponseDto.class);
-            if (user != null) {
-                System.out.println("User found: " + user.getUsername());
+            Object userObj = userServiceFeignClient.getUserById(order.getUserId());
+            if (userObj instanceof UserResponseDto user) {
                 orderDto.setUserName(user.getUsername());
                 orderDto.setUserEmail(user.getEmail());
                 orderDto.setUserPhone(user.getPhone());
-            } else {
-                System.out.println("User not found");
             }
-        } catch (RestClientException e) {
+        } catch (Exception e) {
             System.out.println("User service call failed: " + e.getMessage());
         }
-        
         return orderDto;
     }
 
