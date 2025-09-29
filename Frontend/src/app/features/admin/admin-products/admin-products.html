@@ -64,7 +64,7 @@
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Image</th>
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Product Name</th>
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Category</th>
-            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Brand</th>
+            <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Collection</th>
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Price</th>
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Stock</th>
             <th class="px-6 py-4 text-left text-sm font-semibold text-gray-800">Status</th>
@@ -90,10 +90,10 @@
               <span class="text-sm text-gray-800">{{ product.category }}</span>
             </td>
             <td class="px-6 py-4">
-              <span class="text-sm text-gray-800">{{ product.brand || 'N/A' }}</span>
+              <span class="text-sm text-gray-800">{{ product.collection || 'N/A' }}</span>
             </td>
             <td class="px-6 py-4">
-              <span class="text-sm font-semibold text-gray-800">₹{{ product.price | number:'1.0-0' }}</span>
+              <span class="text-sm font-semibold text-gray-800">₹{{ product.price.toFixed(2) }}</span>
             </td>
             <td class="px-6 py-4">
               <span class="text-sm" [class]="(product.stock || 0) < 10 ? 'text-red-600 font-medium' : 'text-gray-800'">
@@ -119,7 +119,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                   </svg>
                 </button>
-                <button (click)="deleteProduct(toNumber(product.id))"
+                <button (click)="deleteProduct(product.id)"
                         class="p-2 bg-red-500/20 backdrop-blur-sm rounded-lg hover:bg-red-500/30 transition-colors duration-200"
                         title="Delete Product">
                   <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,15 +168,33 @@
             <option *ngFor="let col of collections" [value]="col">{{ col }}</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select [(ngModel)]="newProduct.gender" name="gender">
+            <option value="">Select Gender</option>
+            <option value="Men">Men</option>
+            <option value="Women">Women</option>
+            <option value="Unisex">Unisex</option>
+          </select>
+        </div>
         <div class="form-row">
           <div class="form-group">
             <label>Price (₹)</label>
             <input type="number" [(ngModel)]="newProduct.price" name="price" min="0" required>
           </div>
           <div class="form-group">
-            <label>Stock</label>
-            <input type="number" [(ngModel)]="newProduct.stock" name="stock" min="0" required>
+            <label>Original Price (₹)</label>
+            <input type="number" [(ngModel)]="newProduct.originalPrice" name="originalPrice" min="0">
           </div>
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" [(ngModel)]="newProduct.stock" name="stock" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" [(ngModel)]="newProduct.brand" name="brand">
         </div>
         <div class="form-group">
           <label>Description</label>
@@ -185,6 +203,20 @@
         <div class="form-group">
           <label>Image URL</label>
           <input type="url" [(ngModel)]="newProduct.imageUrl" name="imageUrl">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rating</label>
+            <input type="number" [(ngModel)]="newProduct.rating" name="rating" min="0" max="5" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="newProduct.status" name="status">
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+              <option value="OUT_OF_STOCK">Out of Stock</option>
+            </select>
+          </div>
         </div>
         <div class="form-actions">
           <button type="button" class="cancel-btn" (click)="showAddForm = false">Cancel</button>
@@ -209,9 +241,27 @@
         <div class="form-group">
           <label>Category</label>
           <select [(ngModel)]="editingProduct!.category" name="editCategory" required>
-            <option *ngFor="let category of categories" [value]="category" [selected]="category === editingProduct!.category">
+            <option *ngFor="let category of categories" [value]="category">
               {{ category }}
             </option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Collection</label>
+          <select [(ngModel)]="editingProduct!.collection" name="editCollection" required>
+            <option *ngFor="let col of collections" [value]="col">
+              {{ col }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <select [(ngModel)]="editingProduct!.gender" name="editGender">
+            <option value="">Select Gender</option>
+            <option value="Men">Men</option>
+            <option value="Women">Women</option>
+            <option value="Unisex">Unisex</option>
           </select>
         </div>
         <div class="form-row">
@@ -220,8 +270,38 @@
             <input type="number" [(ngModel)]="editingProduct!.price" name="editPrice" min="0" required>
           </div>
           <div class="form-group">
-            <label>Stock</label>
-            <input type="number" [(ngModel)]="editingProduct!.stock" name="editStock" min="0" required>
+            <label>Original Price (₹)</label>
+            <input type="number" [(ngModel)]="editingProduct!.originalPrice" name="editOriginalPrice" min="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Stock</label>
+          <input type="number" [(ngModel)]="editingProduct!.stock" name="editStock" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Brand</label>
+          <input type="text" [(ngModel)]="editingProduct!.brand" name="editBrand">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="editingProduct!.description" name="editDescription" rows="3"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Image URL</label>
+          <input type="url" [(ngModel)]="editingProduct!.imageUrl" name="editImageUrl">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Rating</label>
+            <input type="number" [(ngModel)]="editingProduct!.rating" name="editRating" min="0" max="5" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Status</label>
+            <select [(ngModel)]="editingProduct!.status" name="editStatus">
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+              <option value="OUT_OF_STOCK">Out of Stock</option>
+            </select>
           </div>
         </div>
         <div class="form-actions">

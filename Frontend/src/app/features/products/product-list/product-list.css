@@ -1,7 +1,57 @@
+/* Collection Navigation Bar */
+.collection-nav {
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.collection-nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.collection-nav-container::-webkit-scrollbar {
+  display: none;
+}
+
+.collection-btn {
+  background: none;
+  border: none;
+  padding: 16px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+  border-bottom: 3px solid transparent;
+  position: relative;
+}
+
+.collection-btn:hover {
+  color: #2874f0;
+  background: rgba(40, 116, 240, 0.05);
+}
+
+.collection-btn.active {
+  color: #2874f0;
+  border-bottom-color: #2874f0;
+  background: rgba(40, 116, 240, 0.05);
+}
+
 .product-list-container {
   width: 100%;
-  margin: 0 auto;
-  padding: 2vw;
+  padding: 20px 0;
 }
 
 .mobile-filter-toggle {
@@ -17,17 +67,20 @@
 
 .main-content {
   display: flex;
-  gap: 2.5vw;
+  gap: 20px;
+  padding: 0 20px;
 }
 
 /* Sidebar */
 .sidebar {
-  width: 20vw;
+  width: 280px;
+  min-width: 280px;
   background: white;
   border-right: 1px solid #f0f0f0;
   height: fit-content;
   position: sticky;
-  top: 0;
+  top: 80px;
+  margin-right: 10px;
 }
 
 .filters-header {
@@ -249,7 +302,7 @@
 .product-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 2vw;
+  gap: 20px;
 }
 
 .product-card {
@@ -284,7 +337,7 @@
 }
 
 .product-info {
-  padding: 1.5vw;
+  padding: 16px;
 }
 
 .category {
@@ -295,18 +348,18 @@
 }
 
 .product-name {
-  font-size: 1.3vw;
+  font-size: 16px;
   font-weight: 600;
   color: #333;
-  margin: 0 0 0.8vw 0;
+  margin: 0 0 8px 0;
   line-height: 1.3;
 }
 
 .price {
-  font-size: 1.8vw;
+  font-size: 18px;
   font-weight: 700;
   color: #007bff;
-  margin-bottom: 0.8vw;
+  margin-bottom: 8px;
 }
 
 .rating {
@@ -330,13 +383,129 @@
 }
 
 .rating-text {
-  font-size: 1vw;
+  font-size: 12px;
   color: #666;
+}
+
+.add-to-cart-btn {
+  background: #1a1a1a;
+  color: white;
+  border: 1px solid #333;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 10px;
+  width: 100%;
+  transition: all 0.2s ease;
+  letter-spacing: 0.3px;
+}
+
+.add-to-cart-btn:hover {
+  background: #000;
+  border-color: #555;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.add-to-cart-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.cart-icon {
+  font-size: 14px;
 }
 
 .empty-state {
   text-align: center;
   padding: 60px 20px;
   color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .product-list-container {
+    padding: 15px;
+  }
+  
+  .main-content {
+    gap: 15px;
+  }
+  
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .collection-nav-container {
+    padding: 0 15px;
+    justify-content: flex-start;
+  }
+  
+  .collection-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+  
+  .product-list-container {
+    padding: 10px;
+  }
+  
+  .mobile-filter-toggle {
+    display: block;
+  }
+  
+  .main-content {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .sidebar {
+    display: none;
+    width: 100%;
+    min-width: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    overflow-y: auto;
+  }
+  
+  .sidebar.open {
+    display: block;
+  }
+  
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .collection-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  
+  .product-name {
+    font-size: 14px;
+  }
+  
+  .price {
+    font-size: 16px;
+  }
 }
 

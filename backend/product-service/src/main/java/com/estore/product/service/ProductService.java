@@ -21,10 +21,6 @@ public class ProductService {
         return productRepository.findByCollection(collection);
     }
 
-    public List<Product> getProductsByType(String type) {
-        return productRepository.findByType(type);
-    }
-
     public Optional<Product> getProductById(String id) {
         return productRepository.findById(id);
     }

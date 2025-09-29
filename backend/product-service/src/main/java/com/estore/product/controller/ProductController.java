@@ -24,10 +24,7 @@ public class ProductController {
         return ResponseEntity.ok(productService.getProductsByCollection(collection));
     }
 
-    @GetMapping("/type/{type}")
-    public ResponseEntity<List<Product>> getProductsByType(@PathVariable String type) {
-        return ResponseEntity.ok(productService.getProductsByType(type));
-    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {

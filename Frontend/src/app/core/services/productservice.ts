@@ -6,20 +6,20 @@ import { ProductListItem } from '../models/product.types';
 import { environment } from '../../../environments/environment';
 
 export interface Product {
-  id?: number;
+  id?: string;
   name: string;
   description: string;
   price: number;
   originalPrice?: number;
   brand?: string;
   category: string;
-  stockQuantity: number;
-  quantity?: number;
+  stock?: number;
+  stockQuantity?: number; // Keep for backward compatibility
   collection: string;
   gender: string;
   imageUrl: string;
   rating: number;
-  type?: string;
+  status?: string;
 }
 
 @Injectable({
@@ -102,7 +102,7 @@ export class Productservice {
       );
   }
 
-  updateProduct(id: number, product: Product): Observable<Product> {
+  updateProduct(id: string, product: Product): Observable<Product> {
     return this.http.put<Product>(`${this.apiUrl}/${id}`, product)
       .pipe(
         retry(1),
@@ -110,7 +110,7 @@ export class Productservice {
       );
   }
 
-  deleteProduct(id: number): Observable<any> {
+  deleteProduct(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`)
       .pipe(
         retry(1),

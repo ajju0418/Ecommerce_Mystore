@@ -24,21 +24,20 @@ export class AdminProducts implements OnInit {
   editingProduct: ProductListItem | null = null;
   newProduct: any = {
     name: '',
-    type: '',
+    category: '',
     collection: '',
     gender: '',
     price: 0,
     originalPrice: 0,
     brand: '',
     stock: 0,
-    quantity: 0,
     description: '',
     imageUrl: '',
     rating: 4.0,
     status: 'ACTIVE'
   };
-  categories = ['Shirts', 'T-Shirts', 'Jeans', 'Jackets', 'Shoes', 'Accessories', 'Dresses', 'Pants', 'Sweaters', 'Hoodies'];
-  collections = ['Deal of the Day', 'New Arrivals', 'Sale', 'Premium', 'Casual', 'Sports'];
+  categories = ['Shirts', 'T-Shirts', 'Jeans', 'Jackets', 'Shoes', 'Accessories', 'Pants', 'Sweaters', 'Hoodies'];
+  collections = ['New Arrivals', 'Premium', 'Casual', 'Sports', 'Men\'s', 'Women\'s', 'Kids', 'Accessories'];
 
   constructor(
 
@@ -52,18 +51,19 @@ export class AdminProducts implements OnInit {
 
   private mapProductToListItem(product: Product): ProductListItem {
     return {
-      id: product.id && !isNaN(Number(product.id)) ? String(product.id) : '', // Ensure id is a valid string
+      id: product.id ? String(product.id) : '',
       name: product.name,
       price: product.price,
       imageUrl: product.imageUrl ?? 'assets/images/no-image.png',
       rating: product.rating ?? 0,
       category: product.category,
       description: product.description,
-      stock: product.stockQuantity,
-      status: (product as any).status, // Status from backend
+      stock: (product as any).stock || 0,
+      status: (product as any).status || 'ACTIVE',
       collection: product.collection,
-      type: product.type,
-      gender: product.gender
+      gender: product.gender,
+      brand: (product as any).brand,
+      originalPrice: (product as any).originalPrice
     };
   }
 
@@ -89,7 +89,7 @@ export class AdminProducts implements OnInit {
             const matchesSearch =
               !this.searchTerm ||
               product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-              (product.type && product.type.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+
               (product.collection && product.collection.toLowerCase().includes(this.searchTerm.toLowerCase()));
             const matchesStatus = !this.selectedStatus || product.status === this.selectedStatus;
             return matchesSearch && matchesStatus;
@@ -104,7 +104,6 @@ export class AdminProducts implements OnInit {
         const matchesSearch =
           !this.searchTerm ||
           product.name.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-          (product.type && product.type.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
           (product.collection && product.collection.toLowerCase().includes(this.searchTerm.toLowerCase()));
         const matchesStatus = !this.selectedStatus || product.status === this.selectedStatus;
         return matchesSearch && matchesStatus;
@@ -115,21 +114,22 @@ export class AdminProducts implements OnInit {
   addProduct() {
     // Add product to backend database
     if (this.newProduct.name && this.newProduct.collection && this.newProduct.price > 0) {
-      const productToAdd: Product = {
+      const productToAdd: any = {
+        id: this.generateProductId(),
         name: this.newProduct.name,
         description: this.newProduct.description,
         price: this.newProduct.price,
         originalPrice: this.newProduct.originalPrice,
         brand: this.newProduct.brand,
-        category: this.newProduct.type, // Assuming type maps to category
-        stockQuantity: this.newProduct.stock,
-        quantity: this.newProduct.quantity,
+        category: this.newProduct.category,
+        stock: this.newProduct.stock,
         collection: this.newProduct.collection,
         gender: this.newProduct.gender,
-        imageUrl: this.newProduct.imageUrl,
-        rating: this.newProduct.rating
+        imageUrl: this.newProduct.imageUrl || 'assets/images/no-image.png',
+        rating: this.newProduct.rating,
+        status: this.newProduct.status
       };
-      this.adminProductService.createProduct(productToAdd).subscribe({
+      this.adminProductService.addProduct(productToAdd).subscribe({
         next: () => {
           alert('Product added successfully!');
           this.loadProducts();
@@ -149,19 +149,25 @@ export class AdminProducts implements OnInit {
   }
 
   updateProduct() {
-    if (this.editingProduct && this.editingProduct.id && !isNaN(Number(this.editingProduct.id))) {
-      const productToUpdate: Product = {
+    console.log('Editing product:', this.editingProduct);
+    console.log('Product ID:', this.editingProduct?.id);
+    if (this.editingProduct && this.editingProduct.id && this.editingProduct.id.trim() !== '') {
+      const productToUpdate: any = {
+        id: this.editingProduct.id,
         name: this.editingProduct.name,
         description: this.editingProduct.description ?? '',
         price: this.editingProduct.price,
+        originalPrice: this.editingProduct.originalPrice,
+        brand: this.editingProduct.brand,
         category: this.editingProduct.category ?? '',
-        stockQuantity: this.editingProduct.stock || 0,
+        stock: this.editingProduct.stock || 0,
         collection: this.editingProduct.collection || '',
         gender: this.editingProduct.gender || '',
         imageUrl: this.editingProduct.imageUrl,
-        rating: this.editingProduct.rating
+        rating: this.editingProduct.rating,
+        status: this.editingProduct.status || 'ACTIVE'
       };
-      this.adminProductService.updateProduct(Number(this.editingProduct.id), productToUpdate).subscribe({
+      this.adminProductService.addProduct(productToUpdate).subscribe({
         next: () => {
           alert('Product updated successfully!');
           this.loadProducts();
@@ -177,13 +183,14 @@ export class AdminProducts implements OnInit {
     }
   }
 
-  deleteProduct(id: number) {
-    if (!id || isNaN(Number(id))) {
+  deleteProduct(id: string) {
+    console.log('Deleting product with ID:', id);
+    if (!id || id.trim() === '') {
       alert('Invalid product ID. Cannot delete product.');
       return;
     }
     if (confirm('Are you sure you want to delete this product?')) {
-      this.adminProductService.deleteProduct(Number(id)).subscribe({
+      this.adminProductService.deleteProduct(id).subscribe({
         next: () => {
           alert('Product deleted successfully!');
           this.loadProducts();
@@ -198,14 +205,13 @@ export class AdminProducts implements OnInit {
   resetForm() {
     this.newProduct = {
       name: '',
-      type: '',
+      category: '',
       collection: '',
       gender: '',
       price: 0,
       originalPrice: 0,
       brand: '',
       stock: 0,
-      quantity: 0,
       description: '',
       imageUrl: '',
       rating: 4.0,
@@ -225,5 +231,9 @@ export class AdminProducts implements OnInit {
 
   toNumber(value: any): number {
     return Number(value);
+  }
+
+  private generateProductId(): string {
+    return 'PROD_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
   }
 }

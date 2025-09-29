@@ -5,16 +5,18 @@ import { Router } from '@angular/router';
 import { Header } from '../../../layout/header/header';
 import { Footer } from '../../../layout/footer/footer';
 import { Productservice } from '../../../core/services/productservice';
+import { CartService } from '../../../core/services/cart-Service';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   category: string;
   brand: string;
   price: number;
   imageUrl: string;
   rating: number;
-  reviewCount: number;
+  reviewCount?: number;
+  collection?: string;
 }
 
 @Component({
@@ -34,6 +36,7 @@ export class ProductListComponent implements OnInit {
   selectedBrands: string[] = [];
   selectedRatings: number[] = [];
   selectedDiscounts: number[] = [];
+  selectedCollection = '';
   minPrice = 0;
   maxPrice = 1000;
   brandSearchTerm = '';
@@ -42,8 +45,9 @@ export class ProductListComponent implements OnInit {
   sortBy = 'popular';
   
   // Filter options
-  categories = ['Men\'s Clothing', 'Women\'s Clothing', 'Electronics', 'Footwear', 'Accessories'];
-  brands = ['Nike', 'Adidas', 'Puma'];
+  categories = ['Shirts', 'T-Shirts', 'Jeans', 'Jackets', 'Accessories', 'Pants', 'Sweaters', 'Hoodies', 'Shoes'];
+  brands = ['Nike', 'Adidas', 'Puma', 'H&M', 'Zara'];
+  collections = ['New Arrivals', 'Premium', 'Casual', 'Sports', 'Men\'s', 'Women\'s', 'Kids', 'Accessories'];
   ratings = [
     { value: 4, text: '4★ & above', stars: [1,1,1,1], emptyStars: [1] },
     { value: 3, text: '3★ & above', stars: [1,1,1], emptyStars: [1,1] },
@@ -61,7 +65,30 @@ export class ProductListComponent implements OnInit {
   // Mobile sidebar
   sidebarOpen = false;
 
-  constructor(private router: Router, private productService: Productservice) {}
+  constructor(private router: Router, private productService: Productservice, private cartService: CartService) {}
+
+  addToCart(product: Product, event: Event): void {
+    event.stopPropagation();
+    
+    // For now, use localStorage until backend cart is properly configured
+    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+    const existingItem = cartItems.find((item: any) => item.id === product.id);
+    
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cartItems.push({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        quantity: 1
+      });
+    }
+    
+    localStorage.setItem('cartItems', JSON.stringify(cartItems));
+    alert('Product added to cart!');
+  }
 
   ngOnInit(): void {
     this.loadProducts();
@@ -69,17 +96,18 @@ export class ProductListComponent implements OnInit {
 
   loadProducts(): void {
     this.loading = true;
-    this.productService.getProductList().subscribe({
+    this.productService.getProducts().subscribe({
       next: (products) => {
         this.products = products.map(p => ({
-          id: +p.id, // convert string to number
+          id: p.id ?? '',
           name: p.name ?? '',
           category: p.category ?? '',
           brand: p.brand ?? '',
           price: p.price ?? 0,
           imageUrl: p.imageUrl ?? '',
           rating: p.rating ?? 0,
-          reviewCount: p.reviewCount ?? 0
+          reviewCount: 0,
+          collection: p.collection ?? ''
         }));
         this.applyFilters();
         this.loading = false;
@@ -96,7 +124,7 @@ export class ProductListComponent implements OnInit {
   getMockProducts(): Product[] {
     return [
       {
-        id: 1,
+        id: '1',
         name: 'Air Max 270',
         category: "Men's Running Shoes",
         brand: 'Nike',
@@ -106,7 +134,7 @@ export class ProductListComponent implements OnInit {
         reviewCount: 128
       },
       {
-        id: 2,
+        id: '2',
         name: 'Ultraboost 22',
         category: "Men's Running Shoes",
         brand: 'Adidas',
@@ -116,7 +144,7 @@ export class ProductListComponent implements OnInit {
         reviewCount: 95
       },
       {
-        id: 3,
+        id: '3',
         name: 'Classic Polo',
         category: "Men's Casual Wear",
         brand: 'Puma',
@@ -126,7 +154,7 @@ export class ProductListComponent implements OnInit {
         reviewCount: 67
       },
       {
-        id: 4,
+        id: '4',
         name: 'Training Shorts',
         category: "Men's Athletic Wear",
         brand: 'Under Armour',
@@ -147,8 +175,10 @@ export class ProductListComponent implements OnInit {
       const priceMatch = product.price >= this.minPrice && product.price <= this.maxPrice;
       const ratingMatch = this.selectedRatings.length === 0 || 
                          this.selectedRatings.some(rating => product.rating >= rating);
+      const collectionMatch = !this.selectedCollection || 
+                             (product as any).collection === this.selectedCollection;
       
-      return categoryMatch && brandMatch && priceMatch && ratingMatch;
+      return categoryMatch && brandMatch && priceMatch && ratingMatch && collectionMatch;
     });
     
     this.applySorting();
@@ -160,7 +190,7 @@ export class ProductListComponent implements OnInit {
         this.filteredProducts.sort((a, b) => b.rating - a.rating);
         break;
       case 'newest':
-        this.filteredProducts.sort((a, b) => b.id - a.id);
+        this.filteredProducts.sort((a, b) => parseInt(b.id) - parseInt(a.id));
         break;
       case 'price-low':
         this.filteredProducts.sort((a, b) => a.price - b.price);
@@ -218,9 +248,15 @@ export class ProductListComponent implements OnInit {
     this.selectedBrands = [];
     this.selectedRatings = [];
     this.selectedDiscounts = [];
+    this.selectedCollection = '';
     this.minPrice = 0;
     this.maxPrice = 1000;
     this.brandSearchTerm = '';
+    this.applyFilters();
+  }
+
+  onCollectionChange(collection: string): void {
+    this.selectedCollection = collection === this.selectedCollection ? '' : collection;
     this.applyFilters();
   }
 
@@ -232,7 +268,7 @@ export class ProductListComponent implements OnInit {
     this.applySorting();
   }
 
-  onProductClick(productId: number): void {
+  onProductClick(productId: string): void {
     this.router.navigate(['/product', productId]);
   }
 

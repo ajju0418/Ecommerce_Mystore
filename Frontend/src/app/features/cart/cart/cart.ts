@@ -37,10 +37,15 @@ export class CartComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.loadCartItems();
     this.cartSubscription = this.cartService.cartItems$.subscribe(items => {
       this.cartItems = items;
       this.calculateTotal();
     });
+  }
+
+  loadCartItems(): void {
+    // Cart items loaded via CartService subscription
   }
 
   ngOnDestroy(): void {

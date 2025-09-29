@@ -1,4 +1,24 @@
 <app-header></app-header>
+
+<!-- Collection Navigation Bar -->
+<nav class="collection-nav">
+  <div class="collection-nav-container">
+    <button 
+      class="collection-btn"
+      [class.active]="selectedCollection === ''"
+      (click)="onCollectionChange('')">
+      All Products
+    </button>
+    <button 
+      *ngFor="let collection of collections"
+      class="collection-btn"
+      [class.active]="selectedCollection === collection"
+      (click)="onCollectionChange(collection)">
+      {{ collection }}
+    </button>
+  </div>
+</nav>
+
 <div class="product-list-container">
   <!-- Mobile filter toggle -->
   <button class="mobile-filter-toggle" (click)="toggleSidebar()">
@@ -152,7 +172,11 @@
           <div class="product-info">
             <div class="category">{{ product.category }}</div>
             <h3 class="product-name">{{ product.name }}</h3>
-            <div class="price">${{ product.price.toFixed(2) }}</div>
+            <div class="price">₹{{ product.price.toFixed(2) }}</div>
+            <button class="add-to-cart-btn" (click)="addToCart(product, $event)">
+              <i class="cart-icon">🛒</i>
+              <span>Add to Cart</span>
+            </button>
             <div class="rating">
               <div class="stars">
                 <span *ngFor="let star of getStars(product.rating)" 

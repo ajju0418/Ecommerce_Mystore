@@ -18,7 +18,6 @@ public class Product {
     private String imageUrl;
     
     private Double rating;
-    private Integer quantity;
     private String category;
     private Double originalPrice;
     private String brand;
@@ -29,20 +28,18 @@ public class Product {
     private Integer stock;
     private String status;
     private String collection;
-    private String type;
     private String gender;
 
     public Product() {}
 
     public Product(String id, String name, Double price, String imageUrl, Double rating, 
-                   String collection, String type, String gender) {
+                   String collection, String gender) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.imageUrl = imageUrl;
         this.rating = rating;
         this.collection = collection;
-        this.type = type;
         this.gender = gender;
         this.status = "ACTIVE";
         this.stock = 100;
@@ -64,9 +61,6 @@ public class Product {
     public Double getRating() { return rating; }
     public void setRating(Double rating) { this.rating = rating; }
     
-    public Integer getQuantity() { return quantity; }
-    public void setQuantity(Integer quantity) { this.quantity = quantity; }
-    
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
     
@@ -87,9 +81,6 @@ public class Product {
     
     public String getCollection() { return collection; }
     public void setCollection(String collection) { this.collection = collection; }
-    
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
     
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
