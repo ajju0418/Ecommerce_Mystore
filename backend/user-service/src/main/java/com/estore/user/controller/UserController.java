@@ -3,6 +3,7 @@ package com.estore.user.controller;
 import com.estore.user.dto.UserLoginDto;
 import com.estore.user.dto.UserRegistrationDto;
 import com.estore.user.dto.UserResponseDto;
+import com.estore.user.dto.ResetPasswordDto;
 import com.estore.user.entity.User;
 import com.estore.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,16 @@ public class UserController {
         try {
             UserResponseDto response = userService.updateUser(userId, updatedUser);
             return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDto dto) {
+        try {
+            userService.resetPassword(dto);
+            return ResponseEntity.ok().body("Password updated successfully");
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -37,32 +37,52 @@ export class AdminCustomers implements OnInit {
   }
 
   private loadAllCustomersWithStats() {
-    this.userService.getAllUsers().subscribe((users: User[]) => {
-      this.orderService.getOrders().subscribe((orders: Order[]) => {
-        const customerMap = new Map<string, CustomerData>();
-        users.forEach((user: User) => {
-          customerMap.set(user.email, {
-            id: user.id ?? 0,
-            name: user.username,
-            email: user.email,
-            phone: user.phone,
-            status: 'Active',
-            joinDate: '', // You can add join date if available in user model
-            orders: 0,
-            totalSpent: 0
-          });
-        });
-        orders.forEach((order: Order) => {
-          if (!order || !order.customerInfo || !order.customerInfo.email) return;
-          const key = order.customerInfo.email;
-          if (customerMap.has(key)) {
-            const customer = customerMap.get(key)!;
-            customer.orders += 1;
-            customer.totalSpent += order.totalAmount;
+    this.userService.getAllUsers().subscribe({
+      next: (users: User[]) => {
+        this.orderService.getAllOrders().subscribe({
+          next: (orders: Order[]) => {
+            const customerMap = new Map<string, CustomerData>();
+            users.forEach((user: User) => {
+              customerMap.set(user.email, {
+                id: user.id ?? 0,
+                name: user.username,
+                email: user.email,
+                phone: user.phone,
+                status: 'Active',
+                joinDate: '',
+                orders: 0,
+                totalSpent: 0
+              });
+            });
+            (orders || []).forEach((order: Order) => {
+              if (!order || !order.customerInfo || !order.customerInfo.email) return;
+              const key = order.customerInfo.email;
+              if (customerMap.has(key)) {
+                const customer = customerMap.get(key)!;
+                customer.orders += 1;
+                customer.totalSpent += order.totalAmount;
+              }
+            });
+            this.customers = Array.from(customerMap.values());
+          },
+          error: () => {
+            // Orders failed: show users without stats
+            this.customers = (users || []).map((u: User) => ({
+              id: u.id ?? 0,
+              name: u.username,
+              email: u.email,
+              phone: u.phone,
+              status: 'Active',
+              joinDate: '',
+              orders: 0,
+              totalSpent: 0
+            }));
           }
         });
-        this.customers = Array.from(customerMap.values());
-      });
+      },
+      error: () => {
+        this.customers = [];
+      }
     });
   }
 
@@ -119,6 +139,7 @@ export class AdminCustomers implements OnInit {
     if (confirm(`Delete customer ${customer.name}? This will remove all their order history.`)) {
       this.userService.deleteUser(customer.id).subscribe({
         next: () => {
+          alert('Customer deleted successfully!');
           this.loadAllCustomersWithStats(); // Refresh list after deletion
         },
         error: (err) => {

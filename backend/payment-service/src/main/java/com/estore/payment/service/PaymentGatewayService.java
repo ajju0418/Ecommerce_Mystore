@@ -16,11 +16,32 @@ public class PaymentGatewayService {
             Thread.sleep(2000);
             
             // Simulate payment gateway logic
-            if (isValidPaymentMethod(request.getPaymentMethod())) {
-                if (isValidCardDetails(request)) {
-                    // Simulate 95% success rate
-                    return random.nextDouble() < 0.95;
+            if (!isValidPaymentMethod(request.getPaymentMethod())) {
+                return false;
+            }
+
+            // Accept UPI and Net Banking without card checks
+            if (request.getPaymentMethod().equalsIgnoreCase("UPI") ||
+                request.getPaymentMethod().equalsIgnoreCase("NET_BANKING") ||
+                request.getPaymentMethod().equalsIgnoreCase("WALLET")) {
+                return random.nextDouble() < 0.98;
+            }
+
+            // Handle EMI: require tenure and treat like card with slightly lower probability
+            if (request.getPaymentMethod().equalsIgnoreCase("EMI")) {
+                if (request.getEmiTenure() == null || request.getEmiTenure().isEmpty()) {
+                    return false;
                 }
+                // If card details are present, validate them; else allow as bank EMI
+                if (hasCardDetails(request) && !isValidCardDetails(request)) {
+                    return false;
+                }
+                return random.nextDouble() < 0.95;
+            }
+
+            // Default card flow (CREDIT_CARD/DEBIT_CARD)
+            if (hasCardDetails(request) && isValidCardDetails(request)) {
+                return random.nextDouble() < 0.97;
             }
             return false;
             
@@ -36,7 +57,8 @@ public class PaymentGatewayService {
                 paymentMethod.equalsIgnoreCase("DEBIT_CARD") ||
                 paymentMethod.equalsIgnoreCase("UPI") ||
                 paymentMethod.equalsIgnoreCase("NET_BANKING") ||
-                paymentMethod.equalsIgnoreCase("WALLET"));
+                paymentMethod.equalsIgnoreCase("WALLET") ||
+                paymentMethod.equalsIgnoreCase("EMI"));
     }
     
     private boolean isValidCardDetails(PaymentRequest request) {
@@ -49,6 +71,10 @@ public class PaymentGatewayService {
                    request.getCvv().length() >= 3;
         }
         return true; // For non-card payments
+    }
+
+    private boolean hasCardDetails(PaymentRequest request) {
+        return request.getCardNumber() != null || request.getCvv() != null || request.getExpiryDate() != null;
     }
     
     public String generateGatewayResponse(boolean success) {

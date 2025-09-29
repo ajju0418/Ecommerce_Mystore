@@ -20,8 +20,7 @@ export class UserService {
     return new Observable(observer => {
       this.http.post(`${this.apiUrl}/login`, loginData).subscribe({
         next: (response: any) => {
-          if (response && response.id) {
-            // Backend returns UserResponseDto directly
+          if (response && response.id && response.token) {
             this.currentUserSubject.next(response);
             localStorage.setItem('currentUser', JSON.stringify(response));
             observer.next({ success: true, user: response });
@@ -74,6 +73,22 @@ export class UserService {
         },
         error: (error) => {
           observer.next({ success: false, message: 'Registration failed' });
+          observer.complete();
+        }
+      });
+    });
+  }
+
+  resetPassword(username: string, phone: string, newPassword: string): Observable<any> {
+    const body = { username, phone, newPassword } as any;
+    return new Observable(observer => {
+      this.http.post(`${this.apiUrl}/reset-password`, body).subscribe({
+        next: () => {
+          observer.next({ success: true });
+          observer.complete();
+        },
+        error: (error) => {
+          observer.next({ success: false, message: 'Reset failed' });
           observer.complete();
         }
       });

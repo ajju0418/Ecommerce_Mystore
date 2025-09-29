@@ -6,6 +6,7 @@ public class UserResponseDto {
     private String email;
     private String phone;
     private String gender;
+    private String token;
 
     public UserResponseDto() {}
 
@@ -31,4 +32,7 @@ public class UserResponseDto {
     
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

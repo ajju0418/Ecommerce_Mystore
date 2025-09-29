@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router, NavigationEnd } from '@angular/router';
 import { AdminSidebar } from '../../../layout/admin-sidebar/admin-sidebar';
 import { filter } from 'rxjs/operators';
+import { UserService } from '../../../core/services/user-service';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -18,13 +19,22 @@ import { filter } from 'rxjs/operators';
 export class AdminDashboard implements OnInit {
   activeSection = 'dashboard';
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private userService: UserService) {}
 
   ngOnInit() {
-    // ✅ Redirect if admin session is missing
-    const isAdmin = localStorage.getItem('isAdmin');
-    if (isAdmin !== 'true') {
-      this.router.navigate(['/adminlogin'], { replaceUrl: true });
+    const token = this.userService.getToken();
+    if (!token) {
+      this.router.navigate(['/login'], { replaceUrl: true });
+      return;
+    }
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload['role'] !== 'ADMIN') {
+        this.router.navigate(['/login'], { replaceUrl: true });
+        return;
+      }
+    } catch {
+      this.router.navigate(['/login'], { replaceUrl: true });
       return;
     }
 
@@ -42,9 +52,7 @@ export class AdminDashboard implements OnInit {
   }
 
   goBackToStore() {
-    localStorage.removeItem('isAdmin');
-    localStorage.removeItem('adminRole');
-    localStorage.removeItem('adminName');
+    this.userService.logout();
     this.router.navigate(['/home'], { replaceUrl: true });
   }
 }

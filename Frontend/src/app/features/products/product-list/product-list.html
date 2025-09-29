@@ -167,7 +167,7 @@
              class="product-card" 
              (click)="onProductClick(product.id)">
           <div class="product-image">
-            <img [src]="product.imageUrl" [alt]="product.name">
+            <img [src]="product.imageUrl" [alt]="product.name" (error)="product.imageUrl='assets/images/no-image.png'">
           </div>
           <div class="product-info">
             <div class="category">{{ product.category }}</div>

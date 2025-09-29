@@ -3,11 +3,13 @@ package com.estore.user.service;
 import com.estore.user.dto.UserLoginDto;
 import com.estore.user.dto.UserRegistrationDto;
 import com.estore.user.dto.UserResponseDto;
+import com.estore.user.dto.ResetPasswordDto;
 import com.estore.user.entity.User;
 import com.estore.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.estore.user.security.JwtUtil;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,6 +21,9 @@ public class UserService {
     private UserRepository userRepository;
     
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     public UserResponseDto registerUser(UserRegistrationDto registrationDto) {
         if (userRepository.existsByUsername(registrationDto.getUsername())) {
@@ -45,9 +50,16 @@ public class UserService {
         if (!passwordEncoder.matches(loginDto.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid username or password");
         }
-        
-        return new UserResponseDto(user.getId(), user.getUsername(), 
+        String role = "USER";
+        if ("admin".equalsIgnoreCase(user.getUsername())) {
+            role = "ADMIN";
+        }
+        String token = jwtUtil.generateToken(user.getUsername(), role);
+
+        UserResponseDto dto = new UserResponseDto(user.getId(), user.getUsername(), 
                                  user.getEmail(), user.getPhone(), user.getGender());
+        dto.setToken(token);
+        return dto;
     }
 
     public List<UserResponseDto> getAllUsers() {
@@ -87,5 +99,18 @@ public class UserService {
         }
         User savedUser = userRepository.save(user);
         return new UserResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender());
+    }
+
+    public void resetPassword(ResetPasswordDto dto) {
+        User user = userRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new RuntimeException("Invalid username or phone"));
+        if (user.getPhone() == null || !user.getPhone().equals(dto.getPhone())) {
+            throw new RuntimeException("Invalid username or phone");
+        }
+        if (dto.getNewPassword() == null || dto.getNewPassword().length() < 6) {
+            throw new RuntimeException("Password must be at least 6 characters");
+        }
+        user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
+        userRepository.save(user);
     }
 }

@@ -48,3 +48,8 @@ info:
     description: User Management Service
     version: 1.0.0
     database: estore_users
+
+jwt:
+  # 256-bit (32-byte) base64-encoded secret. Change for production.
+  secret: c3VwZXItc2VjcmV0LXN1cGVyLXNlY3JldC1zdXBlci1zZWNyZXQyNTY=
+  expirationMs: 86400000

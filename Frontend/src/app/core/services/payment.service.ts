@@ -14,6 +14,7 @@ export interface PaymentRequest {
   cardHolderName?: string;
   upiId?: string;
   bankName?: string;
+  emiTenure?: string;
 }
 
 export interface PaymentResponse {

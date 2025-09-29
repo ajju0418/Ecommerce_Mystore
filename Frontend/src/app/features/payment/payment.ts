@@ -70,6 +70,12 @@ export class PaymentComponent implements OnInit {
 
   selectPaymentMethod(method: string): void {
     this.selectedPaymentMethod = method;
+    if (method !== 'card') {
+      this.cardNumber = '';
+      this.expiryDate = '';
+      this.cvv = '';
+      this.cardHolderName = '';
+    }
   }
 
   processPayment(form: NgForm): void {
@@ -101,12 +107,13 @@ export class PaymentComponent implements OnInit {
             orderId: orderResponse.order.orderId || orderResponse.order.id,
             userId: currentUser.id!,
             amount: this.totalAmount,
-            paymentMethod: this.selectedPaymentMethod,
+            paymentMethod: this.selectedPaymentMethod.toUpperCase(),
             cardNumber: this.cardNumber,
             expiryDate: this.expiryDate,
             cvv: this.cvv,
             cardHolderName: this.cardHolderName,
-            upiId: this.upiId
+            upiId: this.upiId,
+            emiTenure: this.selectedEmiTenure
           };
 
           // Process payment with the backend payment service

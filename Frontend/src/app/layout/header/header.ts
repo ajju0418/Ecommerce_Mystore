@@ -21,6 +21,7 @@ interface User {
 export class Header implements OnInit, OnDestroy {
   open = false;
   currentUser: User | null = null;
+  isAdmin = false;
   cartCount = 0;
   showUserDropdown = false;
   private userSub!: Subscription;
@@ -31,6 +32,15 @@ export class Header implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.userSub = this.userService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      // Detect admin by JWT role; suppress displaying admin username in header
+      const token = this.userService.getToken();
+      this.isAdmin = false;
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.isAdmin = payload['role'] === 'ADMIN';
+        } catch {}
+      }
       if (user && user.id) {
         this.userService.refreshCurrentUserFromBackend(user.id);
         this.cartService.loadUserCart(user.id);

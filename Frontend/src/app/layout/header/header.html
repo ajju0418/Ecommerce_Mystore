@@ -48,7 +48,7 @@
           
           <div class="user-dropdown-container">
             <button class="user-greeting" (click)="toggleUserDropdown()">
-              <span>Hi, {{ currentUser.username || 'User' }}</span>
+              <span>Hi, {{ isAdmin ? 'User' : (currentUser.username || 'User') }}</span>
               <i class="bi bi-chevron-down"></i>
             </button>
             <div *ngIf="showUserDropdown" class="user-dropdown" (mouseleave)="hideUserDropdown()">

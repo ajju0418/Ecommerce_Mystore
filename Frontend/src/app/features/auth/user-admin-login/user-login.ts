@@ -17,6 +17,10 @@ export class UserLogin {
   loginError = false;
   errorMessage = '';
   showPassword = false;
+  forgotMode = false;
+  forgotForm: FormGroup;
+  resetError = '';
+  resetSuccess = '';
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -33,6 +37,12 @@ export class UserLogin {
         Validators.minLength(6)
       ]]
     });
+
+    this.forgotForm = this.fb.group({
+      username: ['', [Validators.required, Validators.minLength(3)]],
+      phone: ['', [Validators.required, Validators.minLength(6)]],
+      newPassword: ['', [Validators.required, Validators.minLength(6)]]
+    });
   }
 
   onSubmit(): void {
@@ -45,7 +55,17 @@ export class UserLogin {
       this.userService.login(username, password).subscribe({
         next: (response) => {
           if (response.success) {
-            localStorage.setItem('isLoggedIn', 'true');
+            const user = response.user || null;
+            const token: string | undefined = user?.token;
+            if (token) {
+              try {
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                if (payload['role'] === 'ADMIN') {
+                  this.router.navigate(['/admin']);
+                  return;
+                }
+              } catch {}
+            }
             this.router.navigate(['/home']);
           } else {
             this.loginError = true;
@@ -73,4 +93,31 @@ export class UserLogin {
   togglePasswordVisibility(): void {
   this.showPassword = !this.showPassword;
 }
+
+  toggleForgot(): void {
+    this.forgotMode = !this.forgotMode;
+    this.loginError = false;
+    this.errorMessage = '';
+  }
+
+  sendReset(): void {
+    this.resetError = '';
+    this.resetSuccess = '';
+    if (this.forgotForm.invalid) {
+      this.markFormGroupTouched(this.forgotForm);
+      return;
+    }
+    const { username, phone, newPassword } = this.forgotForm.value;
+    this.userService.resetPassword(username, phone, newPassword).subscribe(res => {
+      if (res.success) {
+        this.resetSuccess = 'Password updated. Please sign in with your new password.';
+        setTimeout(() => {
+          this.forgotMode = false;
+          this.forgotForm.reset();
+        }, 1000);
+      } else {
+        this.resetError = res.message || 'Reset failed';
+      }
+    });
+  }
 }

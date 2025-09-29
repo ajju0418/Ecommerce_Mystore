@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Header } from '../../../layout/header/header';
 import { Footer } from '../../../layout/footer/footer';
 import { Productservice } from '../../../core/services/productservice';
 import { CartService } from '../../../core/services/cart-Service';
+import { ProductListItem } from '../../../core/models/product.types';
 
 interface Product {
   id: string;
@@ -17,6 +18,7 @@ interface Product {
   rating: number;
   reviewCount?: number;
   collection?: string;
+  gender?: string;
 }
 
 @Component({
@@ -44,10 +46,10 @@ export class ProductListComponent implements OnInit {
   // Sorting
   sortBy = 'popular';
   
-  // Filter options
-  categories = ['Shirts', 'T-Shirts', 'Jeans', 'Jackets', 'Accessories', 'Pants', 'Sweaters', 'Hoodies', 'Shoes'];
-  brands = ['Nike', 'Adidas', 'Puma', 'H&M', 'Zara'];
-  collections = ['New Arrivals', 'Premium', 'Casual', 'Sports', 'Men\'s', 'Women\'s', 'Kids', 'Accessories'];
+  // Filter options (collections fixed to original set)
+  categories: string[] = [];
+  brands: string[] = [];
+  collections: string[] = ['New Arrivals', 'Premium', 'Casual', 'Sports'];
   ratings = [
     { value: 4, text: '4★ & above', stars: [1,1,1,1], emptyStars: [1] },
     { value: 3, text: '3★ & above', stars: [1,1,1], emptyStars: [1,1] },
@@ -65,33 +67,64 @@ export class ProductListComponent implements OnInit {
   // Mobile sidebar
   sidebarOpen = false;
 
-  constructor(private router: Router, private productService: Productservice, private cartService: CartService) {}
+  constructor(private router: Router, private route: ActivatedRoute, private productService: Productservice, private cartService: CartService) {}
 
   addToCart(product: Product, event: Event): void {
     event.stopPropagation();
-    
-    // For now, use localStorage until backend cart is properly configured
-    const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-    const existingItem = cartItems.find((item: any) => item.id === product.id);
-    
-    if (existingItem) {
-      existingItem.quantity += 1;
-    } else {
-      cartItems.push({
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        quantity: 1
-      });
+
+    const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+    const userId = currentUser?.id;
+    if (!userId) {
+      alert('Please login to add items to cart');
+      return;
     }
-    
-    localStorage.setItem('cartItems', JSON.stringify(cartItems));
-    alert('Product added to cart!');
+
+    const item: ProductListItem = {
+      id: String(product.id),
+      name: product.name,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      rating: product.rating,
+      quantity: 1
+    };
+
+    this.cartService.addToCart(item, userId).subscribe(res => {
+      if (res.success) {
+        alert('Product added to cart!');
+      } else {
+        alert('Failed to add to cart');
+      }
+    });
   }
 
   ngOnInit(): void {
-    this.loadProducts();
+    this.route.queryParams.subscribe(params => {
+      const gender = (params['gender'] || '').toString();
+      const category = (params['category'] || '').toString();
+      const collection = (params['collection'] || '').toString();
+
+      // Reset filters first
+      this.selectedCategories = [];
+      this.selectedBrands = [];
+      this.selectedRatings = [];
+      this.selectedDiscounts = [];
+      this.selectedCollection = '';
+
+      if (gender) {
+        // Store desired gender filter temporarily in selectedCollection to be applied in applyFilters
+        // We'll directly match gender in applyFilters using this param
+        (this as any)._routeGender = gender;
+      } else {
+        (this as any)._routeGender = '';
+      }
+      if (category) {
+        this.selectedCategories = [category];
+      }
+      if (collection) {
+        this.selectedCollection = collection;
+      }
+      this.loadProducts();
+    });
   }
 
   loadProducts(): void {
@@ -107,8 +140,18 @@ export class ProductListComponent implements OnInit {
           imageUrl: p.imageUrl ?? '',
           rating: p.rating ?? 0,
           reviewCount: 0,
-          collection: p.collection ?? ''
+          collection: p.collection ?? '',
+          gender: (p as any).gender ?? ''
         }));
+        // Populate filter options from loaded products to reflect database
+        const categorySet = new Set<string>();
+        const brandSet = new Set<string>();
+        this.products.forEach(p => {
+          if (p.category) categorySet.add(p.category);
+          if (p.brand) brandSet.add(p.brand);
+        });
+        this.categories = Array.from(categorySet).sort();
+        this.brands = Array.from(brandSet).sort();
         this.applyFilters();
         this.loading = false;
       },
@@ -167,18 +210,30 @@ export class ProductListComponent implements OnInit {
   }
 
   applyFilters(): void {
+    const routeGender = ((this as any)._routeGender || '').toLowerCase();
     this.filteredProducts = this.products.filter(product => {
+      const prodCategory = (product.category || '').toLowerCase();
+      const prodBrand = (product.brand || '').toLowerCase();
+      const prodCollection = ((product as any).collection || '').toLowerCase();
+      const prodGender = ((product as any).gender || '').toLowerCase();
+
       const categoryMatch = this.selectedCategories.length === 0 || 
-                           this.selectedCategories.includes(product.category);
+        this.selectedCategories.map(c => c.toLowerCase()).includes(prodCategory);
+
       const brandMatch = this.selectedBrands.length === 0 || 
-                        this.selectedBrands.includes(product.brand);
+        this.selectedBrands.map(b => b.toLowerCase()).includes(prodBrand);
+
       const priceMatch = product.price >= this.minPrice && product.price <= this.maxPrice;
+
       const ratingMatch = this.selectedRatings.length === 0 || 
-                         this.selectedRatings.some(rating => product.rating >= rating);
+        this.selectedRatings.some(rating => (product.rating || 0) >= rating);
+
       const collectionMatch = !this.selectedCollection || 
-                             (product as any).collection === this.selectedCollection;
-      
-      return categoryMatch && brandMatch && priceMatch && ratingMatch && collectionMatch;
+        prodCollection === this.selectedCollection.toLowerCase();
+
+      const genderMatch = !routeGender || prodGender === routeGender;
+
+      return categoryMatch && brandMatch && priceMatch && ratingMatch && collectionMatch && genderMatch;
     });
     
     this.applySorting();
@@ -269,7 +324,7 @@ export class ProductListComponent implements OnInit {
   }
 
   onProductClick(productId: string): void {
-    this.router.navigate(['/product', productId]);
+    // No navigation; product details page removed
   }
 
   toggleSidebar(): void {

@@ -17,12 +17,27 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RateLimitingFilter implements GlobalFilter, Ordered {
 
     private final ConcurrentHashMap<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
-    private final int maxRequestsPerMinute = 100; // Configurable rate limit
+    private final int maxRequestsPerMinute;
+
+    public RateLimitingFilter() {
+        String env = System.getenv("GATEWAY_RATE_LIMIT_PER_MINUTE");
+        int configured = 600; // default higher limit to avoid dev throttling
+        if (env != null) {
+            try { configured = Integer.parseInt(env); } catch (NumberFormatException ignored) {}
+        }
+        this.maxRequestsPerMinute = configured;
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String clientId = getClientId(exchange);
         
+        // Allow-list some paths like static assets or health checks
+        String path = exchange.getRequest().getURI().getPath();
+        if (path.startsWith("/assets/") || path.startsWith("/favicon") || path.contains("/health") || path.startsWith("/actuator")) {
+            return chain.filter(exchange);
+        }
+
         if (isRateLimited(clientId)) {
             exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
             exchange.getResponse().getHeaders().add("X-Rate-Limit-Exceeded", "true");

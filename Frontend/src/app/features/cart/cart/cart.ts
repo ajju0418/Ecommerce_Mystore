@@ -173,17 +173,12 @@ export class CartComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Store order data for order-summary component
-    localStorage.setItem('orderSummary', JSON.stringify({
+    // Provide data to OrderSummary via service pre-checkout channel
+    this.orderService.setPreCheckoutOrder({
       items: this.cartItems,
       totalAmount: this.totalAmount
-    }));
-
-    this.router.navigate(['/order-summary'], {
-      state: {
-        orderDetails: this.cartItems,
-        totalAmount: this.totalAmount
-      }
     });
+
+    this.router.navigate(['/order-summary']);
   }
 }

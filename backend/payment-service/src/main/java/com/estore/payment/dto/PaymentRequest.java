@@ -15,6 +15,7 @@ public class PaymentRequest {
     private String expiryDate;
     private String cvv;
     private String cardHolderName;
+    private String emiTenure;
     
     public PaymentRequest() {}
     
@@ -61,4 +62,7 @@ public class PaymentRequest {
     
     public String getCardHolderName() { return cardHolderName; }
     public void setCardHolderName(String cardHolderName) { this.cardHolderName = cardHolderName; }
+
+    public String getEmiTenure() { return emiTenure; }
+    public void setEmiTenure(String emiTenure) { this.emiTenure = emiTenure; }
 }

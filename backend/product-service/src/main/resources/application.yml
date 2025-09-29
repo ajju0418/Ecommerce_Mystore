@@ -16,6 +16,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  sql:
+    init:
+      mode: always
+  jpa:
+    defer-datasource-initialization: true
 
 eureka:
   client:

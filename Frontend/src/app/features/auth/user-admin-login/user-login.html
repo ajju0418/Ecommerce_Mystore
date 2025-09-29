@@ -10,50 +10,98 @@
         <h2>Sign In</h2>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input formControlName="username" type="text" placeholder="Enter username" class="form-input"
-            [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" />
-          <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="form-error">
-            <div *ngIf="loginForm.get('username')?.hasError('required')">Username is required</div>
-            <div *ngIf="loginForm.get('username')?.hasError('minlength')">Username must be at least 3 characters</div>
+      <ng-container *ngIf="!forgotMode; else forgotTpl">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input formControlName="username" type="text" placeholder="Enter username" class="form-input"
+              [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" />
+            <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="form-error">
+              <div *ngIf="loginForm.get('username')?.hasError('required')">Username is required</div>
+              <div *ngIf="loginForm.get('username')?.hasError('minlength')">Username must be at least 3 characters</div>
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="password-input">
-            <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
-              placeholder="Enter password" class="form-input"
-              [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
-            <button type="button" (click)="togglePasswordVisibility()" class="password-toggle">
-              <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+          <div class="form-group">
+            <label class="form-label">Password</label>
+            <div class="password-input">
+              <input formControlName="password" [type]="showPassword ? 'text' : 'password'"
+                placeholder="Enter password" class="form-input"
+                [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
+              <button type="button" (click)="togglePasswordVisibility()" class="password-toggle">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+              </button>
+            </div>
+            <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="form-error">
+              <div *ngIf="loginForm.get('password')?.hasError('required')">Password is required</div>
+              <div *ngIf="loginForm.get('password')?.hasError('minlength')">Password must be at least 6 characters</div>
+            </div>
+          </div>
+
+          <div class="form-actions" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <a (click)="toggleForgot()" style="cursor:pointer; text-decoration:underline;">Forgot password?</a>
+          </div>
+
+          <div *ngIf="loginError" class="error-message">
+            {{ errorMessage }}
+          </div>
+
+          <button type="submit" [disabled]="!loginForm.valid" class="btn btn-primary login-btn">
+            Sign In
+          </button>
+        </form>
+      </ng-container>
+
+      <ng-template #forgotTpl>
+        <form [formGroup]="forgotForm" (ngSubmit)="sendReset()" class="login-form">
+          <div class="form-group">
+            <label class="form-label">Username</label>
+            <input formControlName="username" type="text" placeholder="Enter username" class="form-input"
+              [class.error]="forgotForm.get('username')?.invalid && forgotForm.get('username')?.touched" />
+            <div *ngIf="forgotForm.get('username')?.invalid && forgotForm.get('username')?.touched" class="form-error">
+              <div *ngIf="forgotForm.get('username')?.hasError('required')">Username is required</div>
+              <div *ngIf="forgotForm.get('username')?.hasError('minlength')">Minimum 3 characters</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input formControlName="phone" type="text" placeholder="Enter registered phone" class="form-input"
+              [class.error]="forgotForm.get('phone')?.invalid && forgotForm.get('phone')?.touched" />
+            <div *ngIf="forgotForm.get('phone')?.invalid && forgotForm.get('phone')?.touched" class="form-error">
+              <div *ngIf="forgotForm.get('phone')?.hasError('required')">Phone is required</div>
+              <div *ngIf="forgotForm.get('phone')?.hasError('minlength')">Minimum 6 digits</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <input formControlName="newPassword" [type]="showPassword ? 'text' : 'password'" placeholder="Enter new password" class="form-input"
+              [class.error]="forgotForm.get('newPassword')?.invalid && forgotForm.get('newPassword')?.touched" />
+            <div *ngIf="forgotForm.get('newPassword')?.invalid && forgotForm.get('newPassword')?.touched" class="form-error">
+              <div *ngIf="forgotForm.get('newPassword')?.hasError('required')">New password is required</div>
+              <div *ngIf="forgotForm.get('newPassword')?.hasError('minlength')">Minimum 6 characters</div>
+            </div>
+          </div>
+
+          <div *ngIf="resetError" class="error-message">{{ resetError }}</div>
+          <div *ngIf="resetSuccess" style="color: green; margin-bottom: 8px;">{{ resetSuccess }}</div>
+
+          <div class="form-actions" style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+            <a (click)="toggleForgot()" style="cursor:pointer; text-decoration:underline;">Back to login</a>
+            <button type="submit" [disabled]="!forgotForm.valid" class="btn btn-primary">
+              Update password
             </button>
           </div>
-          <div *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="form-error">
-            <div *ngIf="loginForm.get('password')?.hasError('required')">Password is required</div>
-            <div *ngIf="loginForm.get('password')?.hasError('minlength')">Password must be at least 6 characters</div>
-          </div>
-        </div>
-
-        <div *ngIf="loginError" class="error-message">
-          {{ errorMessage }}
-        </div>
-
-        <button type="submit" [disabled]="!loginForm.valid" class="btn btn-primary login-btn">
-          Sign In
-        </button>
-      </form>
+        </form>
+      </ng-template>
 
       <div class="login-footer">
         <span>New user?</span>
         <a routerLink="/register">Create Account</a>
       </div>
 
-      <div class="admin-link">
-        <a routerLink="/adminlogin" class="btn btn-secondary">Admin Login</a>
-      </div>
+      
     </div>
   </div>
 </div>

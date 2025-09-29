@@ -12,7 +12,6 @@ import { AdminDashboardOverview } from './features/admin/admin-dashboard-overvie
 import { AdminProducts } from './features/admin/admin-products/admin-products';
 import { AdminSales } from './features/admin/admin-sales/admin-sales';
 import { AdminCustomers } from './features/admin/admin-customers/admin-customers';
-import { Adminlogin } from './features/auth/adminlogin/adminlogin';
 import { OrderSummaryComponent } from './features/orders/order-summary/order-summary';
 import { OrderHistoryComponent } from './features/orders/order-history/order-history';
 import { TrackOrderComponent } from './features/orders/track-order/track-order';
@@ -20,7 +19,6 @@ import { OrderDetailsComponent } from './features/orders/order-details/order-det
 import { PaymentComponent } from './features/payment/payment';
 import { UserProfile } from './features/user/user-profile/user-profile';
 import { ProductListComponent } from './features/products/product-list/product-list';
-import { ProductDetailComponent } from './features/products/product-detail/product-detail';
 import { UnsavedChangesGuard } from './core/guards/unsaved-changes.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AuthGuard } from './core/guards/auth.guard';
@@ -33,7 +31,7 @@ export const routes: Routes = [
 
   // Product routes
   { path: 'products', component: ProductListComponent },
-  { path: 'product/:id', component: ProductDetailComponent },
+  // Removed product details route per requirement
 
   // Protected user routes
   { path: 'home', component: Home,},
@@ -56,7 +54,6 @@ export const routes: Routes = [
   { path: 'order-details/:id', component: OrderDetailsComponent },
   { path: 'track-order/:id', component: TrackOrderComponent },
   { path: 'profile', component: UserProfile, canActivate: [AuthGuard] },
-  { path: 'adminlogin', component: Adminlogin },
   {
   path: 'admin',
   component: AdminDashboard,

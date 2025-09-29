@@ -154,6 +154,7 @@ export class OrderService {
           return (orders || []).map(order => ({
             ...order,
             id: order.orderId || order.id,
+            status: (order.status || 'pending').toString().toLowerCase(),
             items: (order.orderItems || []).map((item: any) => ({
               id: item.productId,
               name: item.productName,
@@ -174,7 +175,8 @@ export class OrderService {
 
   updateOrderStatus(id: string, status: Order['status']): Observable<any> {
     return new Observable(observer => {
-      this.http.put(`${this.apiUrl}/${id}/status`, { status })
+      const payload = { status: status.toString().toUpperCase() } as any;
+      this.http.put(`${this.apiUrl}/${id}/status`, payload)
         .pipe(
           retry(1),
           catchError(this.handleError.bind(this))

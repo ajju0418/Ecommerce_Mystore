@@ -84,6 +84,7 @@ export class UserRegister implements CanComponentDeactivate {
       this.userService.register(registerRequest).subscribe({
         next: (response) => {
           this.formSubmitted = true;
+          alert('User registered successfully!');
           console.log('Registration Successful');
           // User is automatically logged in after registration
           this.router.navigate(['/home']);
