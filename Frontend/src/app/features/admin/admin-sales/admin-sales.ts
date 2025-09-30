@@ -47,6 +47,7 @@ export class AdminSales implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status.toLowerCase()) {
+      case 'delivered': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'processing': return 'bg-yellow-100 text-yellow-800';
       case 'pending': return 'bg-gray-100 text-gray-800';
@@ -60,7 +61,7 @@ export class AdminSales implements OnInit {
   }
 
   getCompletedOrders(): number {
-    return this.orders.filter(order => order.status === 'completed').length;
+    return this.orders.filter(order => order.status === 'delivered').length;
   }
 
   getAverageOrderValue(): number {
@@ -97,10 +98,17 @@ export class AdminSales implements OnInit {
   completeOrder(order: Order) {
     if (confirm(`Mark order ${order.id} as completed?`) && order.id) {
       this.orderService.updateOrderStatus(order.id, 'completed').subscribe({
-        next: () => this.loadOrders(),
+        next: (response) => {
+          if (response.success) {
+            alert('Order marked as completed!');
+            this.loadOrders();
+          } else {
+            alert('Failed to update order: ' + response.message);
+          }
+        },
         error: (error: any) => {
           let msg = error?.error?.message || error?.message || 'Failed to update order status';
-          alert(msg);
+          alert('Error: ' + msg);
           console.error('Failed to update order status:', error);
         }
       });
@@ -123,6 +131,7 @@ export class AdminSales implements OnInit {
 
   getPaymentStatusClass(status: string): string {
     switch (status.toLowerCase()) {
+      case 'delivered': return 'status-completed';
       case 'completed': return 'status-completed';
       case 'processing': return 'status-processing';
       case 'pending': return 'bg-yellow-100 text-yellow-800';

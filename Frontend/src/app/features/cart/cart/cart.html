@@ -16,14 +16,14 @@
   <div class="flex flex-col lg:flex-row gap-8 items-start">
 
     <section class="w-full lg:w-2/3">
-      @for (item of cartItems; track item; let i = $index) {
+      @for (item of cartItems; track item.id; let i = $index) {
         <div class="card mb-6 hover-lift animate-slide-in">
           <div class="card-body">
             <div class="flex flex-wrap items-center">
 
               <div class="w-full sm:w-1/4 text-center mb-4 sm:mb-0 flex items-center justify-center">
                 <div class="relative overflow-hidden rounded-lg w-full max-w-[180px] sm:max-w-[220px] md:max-w-[260px] aspect-square mx-auto">
-                  <img [src]="item.imageUrl" alt="{{ item.name }}" (error)="item.imageUrl = 'assets/default.jpg'"
+                  <img [src]="item.imageUrl" alt="{{ item.name }}" (error)="item.imageUrl = 'assets/images/no-image.png'"
                        class="w-full h-full object-cover transition-transform hover:scale-110 duration-300 shadow-md">
                 </div>
               </div>

@@ -43,7 +43,6 @@ export class CartService {
   loadUserCart(userId: number): void {
     this.http.get<any>(`${this.apiUrl}/user/${userId}/cart`)
       .pipe(
-        retry(2),
         catchError(this.handleError.bind(this))
       )
       .subscribe({
@@ -106,7 +105,6 @@ export class CartService {
     return new Observable(observer => {
       this.http.post(`${this.apiUrl}/add`, cartItem)
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -139,7 +137,6 @@ export class CartService {
     return new Observable(observer => {
       this.http.put(`${this.apiUrl}/user/${userId}/product/${productId}?quantity=${quantity}`, {})
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -168,7 +165,6 @@ export class CartService {
     return new Observable(observer => {
       this.http.delete(`${this.apiUrl}/user/${userId}/product/${productId}`)
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -219,7 +215,6 @@ export class CartService {
     return new Observable(observer => {
       this.http.delete(`${this.apiUrl}/user/${userId}/clear`)
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({

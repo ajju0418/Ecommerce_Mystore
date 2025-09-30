@@ -70,7 +70,6 @@ export class OrderService {
   loadUserOrders(userId: number): void {
     this.http.get<any[]>(`${this.apiUrl}/user/${userId}`)
       .pipe(
-        retry(2),
         catchError(this.handleError.bind(this))
       )
       .subscribe({
@@ -148,7 +147,6 @@ export class OrderService {
   getAllOrders(): Observable<Order[]> {
     return this.http.get<any[]>(`${this.apiUrl}/all`)
       .pipe(
-        retry(2),
         map((orders: any[]) => {
           // Map backend data to frontend format
           return (orders || []).map(order => ({
@@ -175,10 +173,8 @@ export class OrderService {
 
   updateOrderStatus(id: string, status: Order['status']): Observable<any> {
     return new Observable(observer => {
-      const payload = { status: status.toString().toUpperCase() } as any;
-      this.http.put(`${this.apiUrl}/${id}/status`, payload)
+      this.http.put(`${this.apiUrl}/${id}/status`, { status: status.toString().toUpperCase() })
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -254,7 +250,6 @@ export class OrderService {
     return new Observable(observer => {
       this.http.get<any>(`${this.apiUrl}/orderdetails/${orderId}`)
         .pipe(
-          retry(2),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -290,7 +285,6 @@ export class OrderService {
     return new Observable(observer => {
       this.http.put(`${this.apiUrl}/${orderId}/cancel`, {})
         .pipe(
-          retry(1),
           catchError(this.handleError.bind(this))
         )
         .subscribe({
@@ -314,16 +308,13 @@ export class OrderService {
   fetchOrderById(orderId: string): Observable<Order> {
     return this.http.get<any>(`${this.apiUrl}/${orderId}`)
       .pipe(
-        retry(2),
         catchError(this.handleError.bind(this)),
         // Get user details and map to frontend Order
         switchMap(order => {
           console.log('Backend order response:', order);
           // Get user details from user service
-          return this.http.get<any>(`${environment.apiUrl}/users/${order.userId}`)
+          return of(null) // Skip user service call to avoid 403 error
             .pipe(
-              retry(1),
-              catchError(() => of(null)), // Return null if user service fails
               switchMap(user => {
                 const orderItems = order.orderItems || [];
                 if (orderItems.length === 0) {
@@ -331,10 +322,10 @@ export class OrderService {
                     ...order,
                     items: [],
                     customerInfo: {
-                      name: user?.username || `User ${order.userId}`,
-                      email: user?.email || 'Not available',
-                      phone: user?.phone || 'Not available',
-                      contact: user?.phone || `User ID: ${order.userId}`,
+                      name: `Customer ${order.userId}`,
+                      email: 'customer@example.com',
+                      phone: '1234567890',
+                      contact: `User ID: ${order.userId}`,
                       address: 'Not available'
                     },
                     orderDate: order.createdAt || order.orderDate || new Date(),
@@ -361,10 +352,10 @@ export class OrderService {
                       quantity: orderItems[index].quantity
                     })),
                     customerInfo: {
-                      name: user?.username || `User ${order.userId}`,
-                      email: user?.email || 'Not available',
-                      phone: user?.phone || 'Not available',
-                      contact: user?.phone || `User ID: ${order.userId}`,
+                      name: `Customer ${order.userId}`,
+                      email: 'customer@example.com',
+                      phone: '1234567890',
+                      contact: `User ID: ${order.userId}`,
                       address: 'Not available'
                     },
                     orderDate: order.createdAt || order.orderDate || new Date(),

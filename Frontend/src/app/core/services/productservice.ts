@@ -49,7 +49,6 @@ export class Productservice {
   getProductById(id: string): Observable<ProductListItem> {
     return this.http.get<ProductListItem>(`${this.apiUrl}/${id}`)
       .pipe(
-        retry(2),
         catchError(this.handleError)
       );
   }

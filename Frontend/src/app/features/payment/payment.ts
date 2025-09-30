@@ -70,12 +70,6 @@ export class PaymentComponent implements OnInit {
 
   selectPaymentMethod(method: string): void {
     this.selectedPaymentMethod = method;
-    if (method !== 'card') {
-      this.cardNumber = '';
-      this.expiryDate = '';
-      this.cvv = '';
-      this.cardHolderName = '';
-    }
   }
 
   processPayment(form: NgForm): void {
@@ -103,35 +97,16 @@ export class PaymentComponent implements OnInit {
         console.log('Order created:', orderResponse);
         if (orderResponse.success && orderResponse.order) {
           // Process payment with backend
-          let backendPaymentMethod = '';
-          switch (this.selectedPaymentMethod) {
-            case 'card':
-              backendPaymentMethod = 'CREDIT_CARD';
-              break;
-            case 'upi':
-              backendPaymentMethod = 'UPI';
-              break;
-            case 'netbanking':
-              backendPaymentMethod = 'NET_BANKING';
-              break;
-            case 'emi':
-              backendPaymentMethod = 'EMI';
-              break;
-            default:
-              backendPaymentMethod = this.selectedPaymentMethod.toUpperCase();
-          }
-
           const paymentRequest: PaymentRequest = {
             orderId: orderResponse.order.orderId || orderResponse.order.id,
             userId: currentUser.id!,
             amount: this.totalAmount,
-            paymentMethod: backendPaymentMethod,
+            paymentMethod: this.selectedPaymentMethod,
             cardNumber: this.cardNumber,
             expiryDate: this.expiryDate,
             cvv: this.cvv,
             cardHolderName: this.cardHolderName,
-            upiId: this.upiId,
-            emiTenure: this.selectedEmiTenure
+            upiId: this.upiId
           };
 
           // Process payment with the backend payment service

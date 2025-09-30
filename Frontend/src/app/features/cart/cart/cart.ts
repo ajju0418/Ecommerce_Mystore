@@ -38,6 +38,10 @@ export class CartComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadCartItems();
+    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    if (user.id) {
+      this.cartService.loadUserCart(user.id);
+    }
     this.cartSubscription = this.cartService.cartItems$.subscribe(items => {
       this.cartItems = items;
       this.calculateTotal();
@@ -61,7 +65,7 @@ export class CartComponent implements OnInit, OnDestroy {
     if (newQty >= 1 && newQty <= 5) {
       const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
       if (user.id) {
-        this.cartService.updateQuantity(item.id, newQty, user.id);
+        this.cartService.updateQuantity(item.id, newQty, user.id).subscribe();
       }
     } else if (newQty > 5) {
       alert('Maximum quantity allowed is 5.');
@@ -106,7 +110,7 @@ export class CartComponent implements OnInit, OnDestroy {
   removeItem(index: number): void {
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (user.id) {
-      this.cartService.removeItem(this.cartItems[index].id, user.id);
+      this.cartService.removeItem(this.cartItems[index].id, user.id).subscribe();
     }
     this.calculateTotal();
   }
@@ -116,7 +120,7 @@ export class CartComponent implements OnInit, OnDestroy {
     this.savedItems.push(item);
     const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
     if (user.id) {
-      this.cartService.removeItem(item.id, user.id);
+      this.cartService.removeItem(item.id, user.id).subscribe();
     }
     alert(`${item.name} has been saved for later.`);
   }
@@ -156,7 +160,7 @@ export class CartComponent implements OnInit, OnDestroy {
       next: () => {
         const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
         if (user.id) {
-          this.cartService.clearCart(user.id);
+          this.cartService.clearCart(user.id).subscribe();
         }
         alert('Order placed successfully!');
         this.router.navigate(['/order-summary']);
