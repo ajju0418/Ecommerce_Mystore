@@ -83,8 +83,8 @@ export class UserService {
     const body = { username, phone, newPassword } as any;
     return new Observable(observer => {
       this.http.post(`${this.apiUrl}/reset-password`, body).subscribe({
-        next: () => {
-          observer.next({ success: true });
+        next: (response: any) => {
+          observer.next(response); // Pass backend response directly
           observer.complete();
         },
         error: (error) => {
@@ -96,16 +96,47 @@ export class UserService {
   }
 
   getAllUsers(): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/all`);
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    return this.http.get<User[]>(`${this.apiUrl}/all`, { headers });
   }
 
   getToken(): string | null {
-    const user = this.getCurrentUser();
-    return user?.token || null;
+    // Try admin first, then fallback to user
+    const admin = localStorage.getItem('currentAdmin');
+    if (admin) {
+      try {
+        const adminObj = JSON.parse(admin);
+        if (adminObj?.token) return adminObj.token;
+      } catch {}
+    }
+    const user = localStorage.getItem('currentUser');
+    if (user) {
+      try {
+        const userObj = JSON.parse(user);
+        if (userObj?.token) return userObj.token;
+      } catch {}
+    }
+    return null;
+  }
+
+  isTokenValid(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
+    
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const currentTime = Math.floor(Date.now() / 1000);
+      return payload.exp > currentTime;
+    } catch (error) {
+      return false;
+    }
   }
 
   deleteUser(userId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${userId}`);
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    return this.http.delete(`${this.apiUrl}/${userId}`, { headers, responseType: 'text' });
   }
 
   updateUser(userId: number, updatedUser: User): Observable<any> {
@@ -113,14 +144,20 @@ export class UserService {
   }
 
   getUserById(userId: number): Observable<User> {
-    return this.http.get<User>(`${this.apiUrl}/${userId}`);
+    const token = this.getToken();
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    return this.http.get<User>(`${this.apiUrl}/${userId}`, { headers });
   }
 
   refreshCurrentUserFromBackend(userId: number): void {
-    this.http.get<User>(`${this.apiUrl}/${userId}`).subscribe({
+    const token = this.getToken() || '';
+    const headers = token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+    this.http.get<User>(`${this.apiUrl}/${userId}`, { headers }).subscribe({
       next: (user) => {
-        this.currentUserSubject.next(user);
-        localStorage.setItem('currentUser', JSON.stringify(user));
+        // Ensure token is a string, not null
+        const userWithToken = { ...user, token };
+        this.currentUserSubject.next(userWithToken);
+        localStorage.setItem('currentUser', JSON.stringify(userWithToken));
       }
     });
   }

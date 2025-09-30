@@ -1,6 +1,5 @@
 package com.estore.admin.service;
 
-import com.estore.admin.dto.AdminLoginDto;
 import com.estore.admin.dto.AdminResponseDto;
 import com.estore.admin.entity.Admin;
 import com.estore.admin.repository.AdminRepository;
@@ -28,20 +27,7 @@ public class AdminService {
         }
     }
 
-    public AdminResponseDto login(AdminLoginDto loginDto) {
-        Admin admin = adminRepository.findByUsername(loginDto.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
-        
-        if (!passwordEncoder.matches(loginDto.getPassword(), admin.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
-        }
-        
-        admin.setLastLogin(LocalDateTime.now());
-        admin = adminRepository.save(admin);
-        
-        return new AdminResponseDto(admin.getId(), admin.getUsername(), 
-                                  admin.getFullName(), admin.getLastLogin());
-    }
+
 
     public AdminResponseDto getAdminProfile(String username) {
         Admin admin = adminRepository.findByUsername(username)

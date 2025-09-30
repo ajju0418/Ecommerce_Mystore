@@ -98,7 +98,11 @@ export class AdminSales implements OnInit {
     if (confirm(`Mark order ${order.id} as completed?`) && order.id) {
       this.orderService.updateOrderStatus(order.id, 'completed').subscribe({
         next: () => this.loadOrders(),
-        error: (error: any) => console.error('Failed to update order status:', error)
+        error: (error: any) => {
+          let msg = error?.error?.message || error?.message || 'Failed to update order status';
+          alert(msg);
+          console.error('Failed to update order status:', error);
+        }
       });
     }
   }

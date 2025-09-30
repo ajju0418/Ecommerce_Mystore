@@ -45,4 +45,8 @@ public class ProductService {
     public List<Product> getProductsByGender(String gender) {
         return productRepository.findByGender(gender);
     }
+
+    public List<Product> getProductsByCategory(String category) {
+        return productRepository.findByCategory(category);
+    }
 }

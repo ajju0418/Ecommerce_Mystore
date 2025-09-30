@@ -29,13 +29,21 @@ public class UserService {
         if (userRepository.existsByUsername(registrationDto.getUsername())) {
             throw new RuntimeException("Username already exists");
         }
-        
+        String role = registrationDto.getRole();
+        if (role == null || role.isEmpty()) {
+            if ("admin".equalsIgnoreCase(registrationDto.getUsername())) {
+                role = "ADMIN";
+            } else {
+                role = "USER";
+            }
+        }
         User user = new User(
             registrationDto.getUsername(),
             registrationDto.getEmail(),
             registrationDto.getPhone(),
             registrationDto.getGender(),
-            passwordEncoder.encode(registrationDto.getPassword())
+            passwordEncoder.encode(registrationDto.getPassword()),
+            role
         );
         
         User savedUser = userRepository.save(user);

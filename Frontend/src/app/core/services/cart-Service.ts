@@ -35,6 +35,10 @@ export class CartService {
   }
 
   private cartCountSubject = new BehaviorSubject<number>(0);
+  private lastAddToCart = 0;
+  private lastRemoveItem = 0;
+  private lastUpdateQuantity = 0;
+  private debounceMs = 500;
 
   loadUserCart(userId: number): void {
     this.http.get<any>(`${this.apiUrl}/user/${userId}/cart`)
@@ -90,6 +94,14 @@ export class CartService {
   }
 
   addToCart(product: ProductListItem, userId: number): Observable<any> {
+    const now = Date.now();
+    if (now - this.lastAddToCart < this.debounceMs) {
+      return new Observable(observer => {
+        observer.next({ success: false, message: 'Please wait before adding again.' });
+        observer.complete();
+      });
+    }
+    this.lastAddToCart = now;
     const cartItem = { productId: product.id, quantity: 1, userId };
     return new Observable(observer => {
       this.http.post(`${this.apiUrl}/add`, cartItem)
@@ -116,6 +128,14 @@ export class CartService {
   }
 
   updateQuantity(productId: string, quantity: number, userId: number): Observable<any> {
+    const now = Date.now();
+    if (now - this.lastUpdateQuantity < this.debounceMs) {
+      return new Observable(observer => {
+        observer.next({ success: false, message: 'Please wait before updating again.' });
+        observer.complete();
+      });
+    }
+    this.lastUpdateQuantity = now;
     return new Observable(observer => {
       this.http.put(`${this.apiUrl}/user/${userId}/product/${productId}?quantity=${quantity}`, {})
         .pipe(
@@ -135,7 +155,16 @@ export class CartService {
         });
     });
   }
+
   removeItem(productId: string, userId: number): Observable<any> {
+    const now = Date.now();
+    if (now - this.lastRemoveItem < this.debounceMs) {
+      return new Observable(observer => {
+        observer.next({ success: false, message: 'Please wait before removing again.' });
+        observer.complete();
+      });
+    }
+    this.lastRemoveItem = now;
     return new Observable(observer => {
       this.http.delete(`${this.apiUrl}/user/${userId}/product/${productId}`)
         .pipe(

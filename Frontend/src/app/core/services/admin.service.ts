@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
@@ -44,66 +44,69 @@ export class AdminService {
     });
   }
 
+  private getAuthHeaders(): HttpHeaders {
+    const admin = JSON.parse(localStorage.getItem('currentAdmin') || '{}');
+    const token = admin?.token;
+    return token ? new HttpHeaders({ Authorization: `Bearer ${token}` }) : new HttpHeaders();
+  }
+
   getAllOrders(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/orders/all`);
+    return this.http.get(`${this.apiUrl}/orders/all`, { headers: this.getAuthHeaders() });
   }
 
   getOrderById(orderId: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/orders/${orderId}`);
+    return this.http.get(`${this.apiUrl}/orders/${orderId}`, { headers: this.getAuthHeaders() });
   }
 
   updateOrderStatus(orderId: string, status: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/orders/update-status`, { 
-      orderId: orderId, 
-      status: status 
-    });
+    return this.http.put(`${this.apiUrl}/orders/update-status`, { orderId: orderId, status: status }, { headers: this.getAuthHeaders() });
   }
 
   getAllProducts(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/products/all`);
+    return this.http.get(`${this.apiUrl}/products/all`, { headers: this.getAuthHeaders() });
   }
 
   getProductsByCategory(category: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/products/category/${category}`);
+    return this.http.get(`${this.apiUrl}/products/category/${category}`, { headers: this.getAuthHeaders() });
   }
 
   updateProductCategory(productId: number, category: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/products/update-category`, { productId, category });
+    return this.http.put(`${this.apiUrl}/products/update-category`, { productId, category }, { headers: this.getAuthHeaders() });
   }
   
   acceptOrder(orderId: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/orders/accept/${orderId}`, {});
+    return this.http.put(`${this.apiUrl}/orders/accept/${orderId}`, {}, { headers: this.getAuthHeaders() });
   }
   
   removeOrder(orderId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/orders/remove/${orderId}`);
+    return this.http.delete(`${this.apiUrl}/orders/remove/${orderId}`, { headers: this.getAuthHeaders() });
   }
   
   deleteOrder(orderId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/orders/${orderId}`);
+    return this.http.delete(`${this.apiUrl}/orders/${orderId}`, { headers: this.getAuthHeaders() });
   }
   
   deleteOrderDirect(orderId: string): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/orders/${orderId}`);
+    return this.http.delete(`${environment.apiUrl}/orders/${orderId}`, { headers: this.getAuthHeaders() });
   }
   
   markOrderAsDelivered(orderId: string): Observable<any> {
-    return this.http.put(`${this.apiUrl}/orders/mark-delivered/${orderId}`, {});
+    return this.http.put(`${this.apiUrl}/orders/mark-delivered/${orderId}`, {}, { headers: this.getAuthHeaders() });
   }
 
   createProduct(product: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/products`, product);
+    return this.http.post(`${this.apiUrl}/products`, product, { headers: this.getAuthHeaders() });
   }
 
   updateProduct(id: number, product: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/products/${id}`, product);
+    return this.http.put(`${this.apiUrl}/products/${id}`, product, { headers: this.getAuthHeaders() });
   }
 
   deleteProduct(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/products/${id}`);
+    return this.http.delete(`${this.apiUrl}/products/${id}`, { headers: this.getAuthHeaders() });
   }
 
   getDashboardData(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/dashboard`);
+    return this.http.get(`${this.apiUrl}/dashboard`, { headers: this.getAuthHeaders() });
   }
 }

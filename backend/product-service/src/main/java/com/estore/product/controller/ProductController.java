@@ -61,7 +61,7 @@ public class ProductController {
 
     @GetMapping("/category/{category}")
     public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getProductsByCollection(category));
+        return ResponseEntity.ok(productService.getProductsByCategory(category));
     }
 
     @GetMapping("/health")

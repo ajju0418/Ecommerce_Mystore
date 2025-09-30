@@ -6,6 +6,7 @@ public class UserRegistrationDto {
     private String phone;
     private String gender;
     private String password;
+    private String role;
 
     public UserRegistrationDto() {}
 
@@ -23,4 +24,7 @@ public class UserRegistrationDto {
     
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

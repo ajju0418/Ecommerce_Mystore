@@ -5,6 +5,7 @@ import { UserService } from '../../../core/services/user-service';
 import { User } from '../../../core/models/user.model';
 import { Header } from '../../../layout/header/header';
 import { Footer } from '../../../layout/footer/footer';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-user-profile',
@@ -18,7 +19,7 @@ export class UserProfile implements OnInit {
   editMode = false;
   editForm: User = {} as User;
 
-  constructor(private userService: UserService) {}
+  constructor(private userService: UserService, private router: Router) {}
 
   ngOnInit() {
     this.user = this.userService.getCurrentUser();
@@ -43,8 +44,13 @@ export class UserProfile implements OnInit {
     if (this.editForm && this.editForm.id) {
       this.userService.updateUser(this.editForm.id, this.editForm).subscribe({
         next: (response) => {
-          this.user = { ...this.editForm };
-          this.editMode = false;
+          // Fetch updated user from backend to ensure UI reflects DB
+          this.userService.getUserById(this.editForm.id!).subscribe({
+            next: (user) => {
+              this.user = user;
+              this.editMode = false;
+            }
+          });
         },
         error: () => {
           // Optionally show error message
@@ -57,6 +63,22 @@ export class UserProfile implements OnInit {
     this.editMode = false;
     if (this.user) {
       this.editForm = { ...this.user };
+    }
+  }
+
+  deleteAccount() {
+    if (this.user && this.user.id) {
+      if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+        this.userService.deleteUser(this.user.id).subscribe({
+          next: () => {
+            this.userService.logout();
+            this.router.navigate(['/login']);
+          },
+          error: () => {
+            alert('Failed to delete account. Please try again.');
+          }
+        });
+      }
     }
   }
 }

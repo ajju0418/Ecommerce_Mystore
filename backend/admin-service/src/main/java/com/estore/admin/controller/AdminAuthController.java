@@ -1,6 +1,5 @@
 package com.estore.admin.controller;
 
-import com.estore.admin.dto.AdminLoginDto;
 import com.estore.admin.dto.AdminResponseDto;
 import com.estore.admin.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,15 +13,7 @@ public class AdminAuthController {
     @Autowired
     private AdminService adminService;
 
-    @PostMapping("/login")
-    public ResponseEntity<AdminResponseDto> login(@RequestBody AdminLoginDto loginDto) {
-        try {
-            AdminResponseDto response = adminService.login(loginDto);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
+
 
     @GetMapping("/profile/{username}")
     public ResponseEntity<AdminResponseDto> getProfile(@PathVariable String username) {

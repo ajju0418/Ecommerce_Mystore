@@ -1,5 +1,6 @@
 package com.estore.product.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 
 @Entity
@@ -55,6 +56,7 @@ public class Product {
     public Double getPrice() { return price; }
     public void setPrice(Double price) { this.price = price; }
     
+    @JsonProperty("imageUrl")
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
     

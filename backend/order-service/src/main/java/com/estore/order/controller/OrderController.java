@@ -71,7 +71,8 @@ public class OrderController {
     @PutMapping("/{orderId}/status")
     public ResponseEntity<OrderDto> updateOrderStatus(@PathVariable String orderId, @RequestBody Map<String, String> body) {
         try {
-            OrderStatus status = OrderStatus.valueOf(body.get("status"));
+            String statusStr = body.get("status");
+            OrderStatus status = OrderStatus.valueOf(statusStr.toUpperCase());
             OrderDto order = orderService.updateOrderStatus(orderId, status);
             return ResponseEntity.ok(order);
         } catch (Exception e) {
