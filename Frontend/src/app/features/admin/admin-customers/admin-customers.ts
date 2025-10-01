@@ -41,29 +41,33 @@ export class AdminCustomers implements OnInit {
       next: (users: User[]) => {
         this.orderService.getAllOrders().subscribe({
           next: (orders: Order[]) => {
-            const customerMap = new Map<string, CustomerData>();
-            users.forEach((user: User) => {
-              customerMap.set(user.email, {
+            // Aggregate orders for each customer by userEmail
+            const orderStats = new Map<string, { orders: number; totalSpent: number }>();
+            (orders || []).forEach((order: Order) => {
+              if (!order || !order.userEmail) return;
+              const email = order.userEmail;
+              if (!orderStats.has(email)) {
+                orderStats.set(email, { orders: 0, totalSpent: 0 });
+              }
+              const stats = orderStats.get(email)!;
+              stats.orders += 1;
+              stats.totalSpent += order.totalAmount || 0;
+            });
+
+            // Build customer list with stats
+            this.customers = (users || []).map((user: User) => {
+              const stats = orderStats.get(user.email) || { orders: 0, totalSpent: 0 };
+              return {
                 id: user.id ?? 0,
                 name: user.username,
                 email: user.email,
                 phone: user.phone,
                 status: 'Active',
                 joinDate: '',
-                orders: 0,
-                totalSpent: 0
-              });
+                orders: stats.orders,
+                totalSpent: stats.totalSpent
+              };
             });
-            (orders || []).forEach((order: Order) => {
-              if (!order || !order.customerInfo || !order.customerInfo.email) return;
-              const key = order.customerInfo.email;
-              if (customerMap.has(key)) {
-                const customer = customerMap.get(key)!;
-                customer.orders += 1;
-                customer.totalSpent += order.totalAmount;
-              }
-            });
-            this.customers = Array.from(customerMap.values());
           },
           error: () => {
             // Orders failed: show users without stats
@@ -94,16 +98,8 @@ export class AdminCustomers implements OnInit {
     this.showActionsIndex = null;
   }
 
-  selectedCustomer: CustomerData | null = null;
-  showDetailsModal = false;
   showEditModal = false;
   editForm: CustomerData = {} as CustomerData;
-
-  viewDetails(customer: CustomerData) {
-    this.selectedCustomer = customer;
-    this.showDetailsModal = true;
-    this.hideActions();
-  }
 
   editCustomer(customer: CustomerData) {
     this.editForm = { ...customer };
@@ -148,11 +144,6 @@ export class AdminCustomers implements OnInit {
       });
     }
     this.hideActions();
-  }
-
-  closeDetailsModal() {
-    this.showDetailsModal = false;
-    this.selectedCustomer = null;
   }
 
   closeEditModal() {

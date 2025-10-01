@@ -1,7 +1,4 @@
 package com.estore.admin;
-
-import com.estore.admin.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -13,8 +10,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients(basePackages = "com.estore.admin.client")
 public class AdminServiceApplication implements CommandLineRunner {
     
-    @Autowired
-    private AdminService adminService;
+   
     
     public static void main(String[] args) {
         SpringApplication.run(AdminServiceApplication.class, args);
@@ -22,6 +18,5 @@ public class AdminServiceApplication implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        adminService.initializeDefaultAdmin();
     }
 }

@@ -167,7 +167,7 @@ export class AdminProducts implements OnInit {
         rating: this.editingProduct.rating,
         status: this.editingProduct.status || 'ACTIVE'
       };
-      this.adminProductService.addProduct(productToUpdate).subscribe({
+      this.adminProductService.updateProduct(productToUpdate.id, productToUpdate).subscribe({
         next: () => {
           alert('Product updated successfully!');
           this.loadProducts();

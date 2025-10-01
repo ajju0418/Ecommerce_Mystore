@@ -73,9 +73,6 @@
             </td>
             <td>
               <div class="action-buttons">
-                <button class="action-btn view" (click)="viewDetails(customer)" title="View Details">
-                  <i class="bi bi-eye"></i>
-                </button>
                 <button class="action-btn edit" (click)="editCustomer(customer)" title="Edit Customer">
                   <i class="bi bi-pencil"></i>
                 </button>
@@ -93,39 +90,6 @@
           </tr>
         </tbody>
       </table>
-    </div>
-  </div>
-
-  <!-- Details Modal -->
-  <div *ngIf="showDetailsModal" class="modal-overlay" (click)="closeDetailsModal()">
-    <div class="modal-content" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h3>Customer Details</h3>
-        <button class="close-btn" (click)="closeDetailsModal()">&times;</button>
-      </div>
-      <div class="modal-body" *ngIf="selectedCustomer">
-        <div class="detail-row">
-          <strong>Name:</strong> {{ selectedCustomer.name }}
-        </div>
-        <div class="detail-row">
-          <strong>Email:</strong> {{ selectedCustomer.email }}
-        </div>
-        <div class="detail-row">
-          <strong>Phone:</strong> {{ selectedCustomer.phone }}
-        </div>
-        <div class="detail-row">
-          <strong>Status:</strong> {{ selectedCustomer.status }}
-        </div>
-        <div class="detail-row">
-          <strong>Join Date:</strong> {{ selectedCustomer.joinDate }}
-        </div>
-        <div class="detail-row">
-          <strong>Total Orders:</strong> {{ selectedCustomer.orders }}
-        </div>
-        <div class="detail-row">
-          <strong>Total Spent:</strong> ₹{{ selectedCustomer.totalSpent.toLocaleString() }}
-        </div>
-      </div>
     </div>
   </div>
 

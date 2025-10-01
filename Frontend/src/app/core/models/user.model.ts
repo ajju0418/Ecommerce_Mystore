@@ -6,5 +6,6 @@ export interface User {
   gender: string;
   password: string;
   token?: string;
+  createdAt?: string;
 
 }

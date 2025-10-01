@@ -78,16 +78,8 @@ export class AdminService {
     return this.http.put(`${this.apiUrl}/orders/accept/${orderId}`, {}, { headers: this.getAuthHeaders() });
   }
   
-  removeOrder(orderId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/orders/remove/${orderId}`, { headers: this.getAuthHeaders() });
-  }
-  
   deleteOrder(orderId: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/orders/${orderId}`, { headers: this.getAuthHeaders() });
-  }
-  
-  deleteOrderDirect(orderId: string): Observable<any> {
-    return this.http.delete(`${environment.apiUrl}/orders/${orderId}`, { headers: this.getAuthHeaders() });
   }
   
   markOrderAsDelivered(orderId: string): Observable<any> {

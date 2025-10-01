@@ -41,13 +41,10 @@ export class Header implements OnInit, OnDestroy {
           this.isAdmin = payload['role'] === 'ADMIN';
         } catch {}
       }
-      if (user && user.id) {
-        this.userService.refreshCurrentUserFromBackend(user.id);
-        this.cartService.loadUserCart(user.id);
-        this.cartSub = this.cartService.cartCount$.subscribe(count => {
-          this.cartCount = count;
-        });
-      }
+      // Do NOT call loadUserCart here; rely on CartComponent to load cart
+      this.cartSub = this.cartService.cartCount$.subscribe(count => {
+        this.cartCount = count;
+      });
     });
   }
 

@@ -153,6 +153,10 @@ export class OrderService {
             ...order,
             id: order.orderId || order.id,
             status: (order.status || 'pending').toString().toLowerCase(),
+            userName: order.userName || order.customerInfo?.name || '',
+            userEmail: order.userEmail || order.customerInfo?.email || '',
+            userPhone: order.userPhone || order.customerInfo?.phone || '',
+            orderDate: order.orderDate || order.createdAt || '',
             items: (order.orderItems || []).map((item: any) => ({
               id: item.productId,
               name: item.productName,
@@ -167,8 +171,8 @@ export class OrderService {
       );
   }
 
-  getOrderById(id: string): Order | undefined {
-    return this.ordersSubject.value.find(order => order.id === id);
+  getOrderById(id: string): Observable<Order> {
+    return this.http.get<Order>(`${this.apiUrl}/${id}`);
   }
 
   updateOrderStatus(id: string, status: Order['status']): Observable<any> {

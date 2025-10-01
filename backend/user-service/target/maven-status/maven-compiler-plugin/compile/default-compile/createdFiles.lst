@@ -3,6 +3,7 @@ com\estore\user\UserServiceApplication.class
 com\estore\user\UserServiceHealthController.class
 com\estore\user\dto\UserRegistrationDto.class
 com\estore\user\repository\UserRepository.class
+com\estore\user\dto\ResetPasswordDto.class
 com\estore\user\security\JwtAuthenticationFilter.class
 com\estore\user\security\JwtUtil.class
 com\estore\user\controller\UserController.class

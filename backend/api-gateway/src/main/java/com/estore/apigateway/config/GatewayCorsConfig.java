@@ -1,1 +1,0 @@
-// CORS is now handled in application.yml - no Java config needed

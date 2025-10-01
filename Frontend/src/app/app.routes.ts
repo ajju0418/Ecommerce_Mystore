@@ -1,4 +1,3 @@
-
 import { Routes } from '@angular/router';
 import { NotFound } from './pages/not-found/not-found';
 import { Home } from './pages/home/home';
@@ -44,11 +43,10 @@ export const routes: Routes = [
 },
 
   {
-  path: 'order-summary',
-  component: OrderSummaryComponent,
-
-  canDeactivate: [UnsavedChangesGuard]
-},
+    path: 'order-summary',
+    component: OrderSummaryComponent,
+    canDeactivate: [UnsavedChangesGuard]
+  },
   { path: 'payment', component: PaymentComponent },
   { path: 'order-history', component: OrderHistoryComponent },
   { path: 'order-details/:id', component: OrderDetailsComponent },

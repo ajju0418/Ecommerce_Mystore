@@ -26,7 +26,7 @@ export class AdminSales implements OnInit {
           ...order,
           customerInfo: {
             ...order.customerInfo,
-            name: order.userName || 'N/A',
+            name: order.userName || order.customerInfo?.name || order.userEmail || 'N/A', // Use userName, fallback to customerInfo.name, then userEmail
             email: order.userEmail || '',
             phone: order.userPhone || '',
             address: order.customerInfo?.address || ''

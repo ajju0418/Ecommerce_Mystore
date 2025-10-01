@@ -48,7 +48,7 @@ public class UserService {
         
         User savedUser = userRepository.save(user);
         return new UserResponseDto(savedUser.getId(), savedUser.getUsername(), 
-                                 savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender());
+                                 savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender(), savedUser.getCreatedAt());
     }
 
     public UserResponseDto loginUser(UserLoginDto loginDto) {
@@ -65,14 +65,14 @@ public class UserService {
         String token = jwtUtil.generateToken(user.getUsername(), role);
 
         UserResponseDto dto = new UserResponseDto(user.getId(), user.getUsername(), 
-                                 user.getEmail(), user.getPhone(), user.getGender());
+                                 user.getEmail(), user.getPhone(), user.getGender(), user.getCreatedAt());
         dto.setToken(token);
         return dto;
     }
 
     public List<UserResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
-            .map(user -> new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getGender()))
+            .map(user -> new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getGender(), user.getCreatedAt()))
             .collect(Collectors.toList());
     }
 
@@ -81,7 +81,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
         
         return new UserResponseDto(user.getId(), user.getUsername(), 
-                                 user.getEmail(), user.getPhone(), user.getGender());
+                                 user.getEmail(), user.getPhone(), user.getGender(), user.getCreatedAt());
     }
 
     public void deleteUser(Long userId) {
@@ -106,7 +106,7 @@ public class UserService {
             user.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
         }
         User savedUser = userRepository.save(user);
-        return new UserResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender());
+        return new UserResponseDto(savedUser.getId(), savedUser.getUsername(), savedUser.getEmail(), savedUser.getPhone(), savedUser.getGender(), savedUser.getCreatedAt());
     }
 
     public void resetPassword(ResetPasswordDto dto) {
