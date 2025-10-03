@@ -1,3 +1,4 @@
+<app-header></app-header>
 
 <div class="track-order-container">
   <div class="track-order-card">
@@ -8,12 +9,12 @@
     <div class="order-info">
       <h2>Order ID: <span>{{ orderId }}</span></h2>
       <div class="status-badge" [ngClass]="{
-        'status-pending': trackingStatus === 'pending',
-        'status-processing': trackingStatus === 'processing',
-        'status-completed': trackingStatus === 'completed',
-        'status-cancelled': trackingStatus === 'cancelled'
+        'status-pending': getDisplayStatus() === 'pending',
+        'status-processing': getDisplayStatus() === 'processing',
+        'status-completed': getDisplayStatus() === 'delivered' || getDisplayStatus() === 'completed',
+        'status-cancelled': getDisplayStatus() === 'cancelled'
       }">
-        {{ trackingStatus | titlecase }}
+        {{ getDisplayStatus() | titlecase }}
       </div>
       <p class="status-message">{{ getStatusMessage() }}</p>
     </div>
@@ -57,3 +58,5 @@
     </div>
   </div>
 </div>
+
+<app-footer></app-footer>

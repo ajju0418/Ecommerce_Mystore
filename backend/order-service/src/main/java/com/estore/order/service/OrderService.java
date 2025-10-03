@@ -38,6 +38,7 @@ public class OrderService {
     public OrderDto createOrder(CheckoutDto checkoutDto) {
         // Generate unique order ID
         String orderId = generateOrderId();
+        System.out.println("OrderService: Creating order with ID: " + orderId);
         
         // Calculate total amount
         BigDecimal totalAmount = checkoutDto.getItems().stream()
@@ -46,7 +47,18 @@ public class OrderService {
         
         // Create order
         Order order = new Order(orderId, checkoutDto.getUserId(), totalAmount);
+        
+        // Set customer information if provided
+        if (checkoutDto.getCustomerInfo() != null) {
+            order.setCustomerName(checkoutDto.getCustomerInfo().getName());
+            order.setCustomerEmail(checkoutDto.getCustomerInfo().getEmail());
+            order.setCustomerPhone(checkoutDto.getCustomerInfo().getPhone());
+            order.setCustomerAddress(checkoutDto.getCustomerInfo().getAddress());
+        }
+        
+        System.out.println("OrderService: Saving order to database...");
         order = orderRepository.save(order);
+        System.out.println("OrderService: Order saved with database ID: " + order.getId() + ", Order ID: " + order.getOrderId());
         
         // Create order items
         final Order finalOrder = order;
@@ -55,8 +67,10 @@ public class OrderService {
                                          item.getPrice(), item.getQuantity()))
                 .collect(Collectors.toList());
         
+        System.out.println("OrderService: Saving " + orderItems.size() + " order items...");
         orderItemRepository.saveAll(orderItems);
         order.setOrderItems(orderItems);
+        System.out.println("OrderService: Order creation completed successfully");
         
         return convertToDto(order);
     }
@@ -86,20 +100,48 @@ public class OrderService {
     }
 
     public List<OrderDto> getAllOrders() {
+        System.out.println("OrderService: Fetching all orders from database...");
         List<Order> orders = orderRepository.findAllByOrderByCreatedAtDesc();
+        System.out.println("OrderService: Found " + orders.size() + " orders in database");
+        for (Order order : orders) {
+            System.out.println("OrderService: Order ID: " + order.getOrderId() + ", Status: " + order.getStatus() + ", Customer: " + order.getCustomerName());
+        }
         return orders.stream()
-                .map(this::convertToDto)
+                .map(order -> {
+                    OrderDto orderDto = convertToDto(order);
+                    // Try to get user information if customer info is missing
+                    if (orderDto.getCustomerName() == null || orderDto.getCustomerName().isEmpty()) {
+                        try {
+                            Object userObj = userServiceFeignClient.getUserById(order.getUserId());
+                            if (userObj instanceof UserResponseDto user) {
+                                orderDto.setUserName(user.getUsername());
+                                orderDto.setUserEmail(user.getEmail());
+                                orderDto.setUserPhone(user.getPhone());
+                                System.out.println("OrderService: Fetched user info for order " + order.getOrderId() + ": " + user.getUsername());
+                            }
+                        } catch (Exception e) {
+                            System.out.println("OrderService: User service call failed for order " + order.getOrderId() + ": " + e.getMessage());
+                        }
+                    }
+                    return orderDto;
+                })
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public OrderDto updateOrderStatus(String orderId, OrderStatus status) {
+        System.out.println("OrderService: Looking for order with ID: " + orderId);
         Order order = orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+                .orElseThrow(() -> {
+                    System.out.println("OrderService: Order not found with ID: " + orderId);
+                    return new RuntimeException("Order not found with ID: " + orderId);
+                });
         
+        System.out.println("OrderService: Found order, updating status from " + order.getStatus() + " to " + status);
         order.setStatus(status);
         order.setUpdatedAt(LocalDateTime.now());
         order = orderRepository.save(order);
+        System.out.println("OrderService: Order status updated successfully");
         
         return convertToDto(order);
     }
@@ -127,7 +169,7 @@ public class OrderService {
         if (paymentDetails.containsKey("status")) {
             String paymentStatus = (String) paymentDetails.get("status");
             if ("completed".equals(paymentStatus) || "success".equals(paymentStatus)) {
-                order.setStatus(OrderStatus.PAID);
+                order.setStatus(OrderStatus.PROCESSING);
             }
         }
         
@@ -138,7 +180,7 @@ public class OrderService {
     }
     
     private String generateOrderId() {
-        return "ORD-" + System.currentTimeMillis() + "-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        return String.valueOf(100000 + new java.util.Random().nextInt(900000));
     }
 
     private OrderDto convertToDto(Order order) {
@@ -149,8 +191,16 @@ public class OrderService {
                                                     item.getQuantity(), item.getSubtotal()))
                         .collect(Collectors.toList()) : List.of();
         
-        return new OrderDto(order.getId(), order.getOrderId(), order.getUserId(), 
+        OrderDto orderDto = new OrderDto(order.getId(), order.getOrderId(), order.getUserId(), 
                            order.getTotalAmount(), order.getStatus(), order.getCreatedAt(), 
                            order.getUpdatedAt(), itemDtos);
+        
+        // Set customer information
+        orderDto.setCustomerName(order.getCustomerName());
+        orderDto.setCustomerEmail(order.getCustomerEmail());
+        orderDto.setCustomerPhone(order.getCustomerPhone());
+        orderDto.setCustomerAddress(order.getCustomerAddress());
+        
+        return orderDto;
     }
 }

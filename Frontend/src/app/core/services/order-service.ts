@@ -152,7 +152,7 @@ export class OrderService {
           return (orders || []).map(order => ({
             ...order,
             id: order.orderId || order.id,
-            status: (order.status || 'pending').toString().toLowerCase(),
+            status: (order.status || 'pending').toString().toLowerCase() as Order['status'],
             userName: order.userName || order.customerInfo?.name || '',
             userEmail: order.userEmail || order.customerInfo?.email || '',
             userPhone: order.userPhone || order.customerInfo?.phone || '',
@@ -177,21 +177,46 @@ export class OrderService {
 
   updateOrderStatus(id: string, status: Order['status']): Observable<any> {
     return new Observable(observer => {
-      this.http.put(`${this.apiUrl}/${id}/status`, { status: status.toString().toUpperCase() })
+      const url = `${this.apiUrl}/${id}/status`;
+      const body = { status: status.toString().toUpperCase() };
+      
+      console.log('=== FRONTEND ORDER STATUS UPDATE DEBUG ===');
+      console.log('OrderService: Updating order status');
+      console.log('OrderService: URL:', url);
+      console.log('OrderService: Order ID:', id);
+      console.log('OrderService: Status:', status);
+      console.log('OrderService: Request body:', body);
+      
+      this.http.put(url, body)
         .pipe(
           catchError(this.handleError.bind(this))
         )
         .subscribe({
-          next: (response) => {
-            const orders = this.ordersSubject.value.map(order =>
-              order.id === id ? { ...order, status } : order
-            );
-            this.ordersSubject.next(orders);
-            observer.next({ success: true, message: 'Order status updated' });
+          next: (response: any) => {
+            console.log('OrderService: Response received:', response);
+            // Backend now returns a success wrapper with order data
+            if (response && response.success) {
+              const orders = this.ordersSubject.value.map(order =>
+                order.id === id ? { ...order, status: status.toLowerCase() as Order['status'] } : order
+              );
+              this.ordersSubject.next(orders);
+              observer.next({ success: true, message: response.message || 'Order status updated', order: response.order });
+            } else {
+              observer.next({ success: false, message: response?.message || 'Failed to update order status' });
+            }
             observer.complete();
           },
           error: (error) => {
-            observer.next({ success: false, message: 'Failed to update order status' });
+            console.error('OrderService: Update order status error:', error);
+            console.error('OrderService: Error details:', {
+              status: error.status,
+              statusText: error.statusText,
+              url: error.url,
+              error: error.error,
+              message: error.message
+            });
+            const errorMessage = error?.error?.message || error?.message || 'Failed to update order status';
+            observer.next({ success: false, message: errorMessage });
             observer.complete();
           }
         });
@@ -326,11 +351,11 @@ export class OrderService {
                     ...order,
                     items: [],
                     customerInfo: {
-                      name: `Customer ${order.userId}`,
-                      email: 'customer@example.com',
-                      phone: '1234567890',
-                      contact: `User ID: ${order.userId}`,
-                      address: 'Not available'
+                      name: order.customerName || `Customer ${order.userId}`,
+                      email: order.customerEmail || 'customer@example.com',
+                      phone: order.customerPhone || '1234567890',
+                      contact: order.customerPhone || `User ID: ${order.userId}`,
+                      address: order.customerAddress || 'Not available'
                     },
                     orderDate: order.createdAt || order.orderDate || new Date(),
                   });
@@ -356,11 +381,11 @@ export class OrderService {
                       quantity: orderItems[index].quantity
                     })),
                     customerInfo: {
-                      name: `Customer ${order.userId}`,
-                      email: 'customer@example.com',
-                      phone: '1234567890',
-                      contact: `User ID: ${order.userId}`,
-                      address: 'Not available'
+                      name: order.customerName || `Customer ${order.userId}`,
+                      email: order.customerEmail || 'customer@example.com',
+                      phone: order.customerPhone || '1234567890',
+                      contact: order.customerPhone || `User ID: ${order.userId}`,
+                      address: order.customerAddress || 'Not available'
                     },
                     orderDate: order.createdAt || order.orderDate || new Date(),
                   }))

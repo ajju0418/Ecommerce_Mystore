@@ -1,9 +1,20 @@
 package com.estore.order.entity;
 
-import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "orders")
@@ -31,11 +42,23 @@ public class Order {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
     
+    @Column(name = "customer_name")
+    private String customerName;
+    
+    @Column(name = "customer_email")
+    private String customerEmail;
+    
+    @Column(name = "customer_phone")
+    private String customerPhone;
+    
+    @Column(name = "customer_address", length = 500)
+    private String customerAddress;
+    
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
 
     public enum OrderStatus {
-        PENDING, PAID, CONFIRMED, PROCESSING, SHIPPED, DELIVERED, COMPLETED, CANCELLED, FAILED
+        PENDING, PROCESSING, COMPLETED, CANCELLED
     }
 
     public Order() {
@@ -79,4 +102,16 @@ public class Order {
     
     public List<OrderItem> getOrderItems() { return orderItems; }
     public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
+    
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    
+    public String getCustomerEmail() { return customerEmail; }
+    public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }
+    
+    public String getCustomerPhone() { return customerPhone; }
+    public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+    
+    public String getCustomerAddress() { return customerAddress; }
+    public void setCustomerAddress(String customerAddress) { this.customerAddress = customerAddress; }
 }

@@ -91,31 +91,36 @@ export class PaymentComponent implements OnInit {
     this.paymentStep = 2;
     console.log('Payment step set to:', this.paymentStep);
     
-    // Create order first to get orderId
-    this.orderService.createOrder(this.orderDetails, this.totalAmount, this.customerDetails).subscribe({
-      next: (orderResponse) => {
-        console.log('Order created:', orderResponse);
-        if (orderResponse.success && orderResponse.order) {
-          // Process payment with backend
-          const paymentRequest: PaymentRequest = {
-            orderId: orderResponse.order.orderId || orderResponse.order.id,
-            userId: currentUser.id!,
-            amount: this.totalAmount,
-            paymentMethod: this.selectedPaymentMethod,
-            cardNumber: this.cardNumber,
-            expiryDate: this.expiryDate,
-            cvv: this.cvv,
-            cardHolderName: this.cardHolderName,
-            upiId: this.upiId
-          };
+    // Generate temporary order ID for payment processing
+    const tempOrderId = 'TEMP-' + Date.now() + '-' + Math.random().toString(36).substr(2, 8);
+    
+    // Process payment first
+    const paymentRequest: PaymentRequest = {
+      orderId: tempOrderId,
+      userId: currentUser.id!,
+      amount: this.totalAmount,
+      paymentMethod: this.mapPaymentMethod(this.selectedPaymentMethod),
+      cardNumber: this.cardNumber,
+      expiryDate: this.expiryDate,
+      cvv: this.cvv,
+      cardHolderName: this.cardHolderName,
+      upiId: this.upiId,
+      emiTenure: this.selectedEmiTenure
+    };
 
-          // Process payment with the backend payment service
-          this.paymentService.processPayment(paymentRequest).subscribe({
-            next: (paymentResponse) => {
-              console.log('Payment processing complete:', paymentResponse);
+    // Process payment with the backend payment service
+    this.paymentService.processPayment(paymentRequest).subscribe({
+      next: (paymentResponse) => {
+        console.log('Payment processing complete:', paymentResponse);
+        
+        if (paymentResponse.success) {
+          // Payment successful, now create the order
+          this.orderService.createOrder(this.orderDetails, this.totalAmount, this.customerDetails).subscribe({
+            next: (orderResponse) => {
+              console.log('Order created after successful payment:', orderResponse);
               this.isProcessing = false;
               
-              if (paymentResponse.success) {
+              if (orderResponse.success && orderResponse.order) {
                 this.paymentStatus = 'success';
                 this.paymentStep = 3;
                 this.transactionId = paymentResponse.transactionId || this.generateTransactionId();
@@ -130,29 +135,31 @@ export class PaymentComponent implements OnInit {
                 }, 2000);
               } else {
                 this.paymentStatus = 'failed';
-                this.paymentFailureReason = paymentResponse.message || 'Payment processing failed';
+                this.paymentFailureReason = 'Order creation failed after payment';
                 this.paymentStep = 4;
               }
             },
             error: (error) => {
-              console.error('Payment processing error:', error);
+              console.error('Order creation error after payment:', error);
               this.isProcessing = false;
               this.paymentStatus = 'failed';
-              this.paymentFailureReason = 'Payment service error. Please try again.';
+              this.paymentFailureReason = 'Order creation failed after payment. Please contact support.';
               this.paymentStep = 4;
             }
           });
         } else {
+          // Payment failed, don't create order
           this.isProcessing = false;
           this.paymentStatus = 'failed';
-          this.paymentFailureReason = 'Failed to create order';
+          this.paymentFailureReason = paymentResponse.message || 'Payment processing failed';
           this.paymentStep = 4;
         }
       },
       error: (error) => {
+        console.error('Payment processing error:', error);
         this.isProcessing = false;
         this.paymentStatus = 'failed';
-        this.paymentFailureReason = 'Failed to create order. Please try again.';
+        this.paymentFailureReason = 'Payment service error. Please try again.';
         this.paymentStep = 4;
       }
     });
@@ -185,6 +192,16 @@ export class PaymentComponent implements OnInit {
       this.router.navigate(['/order-summary']);
     } else {
       this.retryPayment();
+    }
+  }
+
+  private mapPaymentMethod(method: string): string {
+    switch (method) {
+      case 'card': return 'CREDIT_CARD';
+      case 'upi': return 'UPI';
+      case 'netbanking': return 'NET_BANKING';
+      case 'emi': return 'EMI';
+      default: return method.toUpperCase();
     }
   }
 }

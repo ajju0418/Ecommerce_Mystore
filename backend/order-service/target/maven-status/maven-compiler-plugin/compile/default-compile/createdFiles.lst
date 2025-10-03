@@ -1,3 +1,4 @@
+com\estore\order\dto\CustomerInfoDto.class
 com\estore\order\client\UserServiceFeignClient.class
 com\estore\order\client\PaymentServiceFeignClient.class
 com\estore\order\dto\CheckoutDto.class

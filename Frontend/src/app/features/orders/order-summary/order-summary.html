@@ -14,7 +14,7 @@
     </div>
   </header>
 
-  <div class="flex flex-col lg:flex-row gap-8 items-start">
+  <div class="flex flex-col lg:flex-row gap-8 items-start mx-6">
 
     <!-- Order Details Section -->
     <section class="lg:w-2/3">
@@ -29,7 +29,7 @@
           @for (item of orderDetails; track item.id) {
             <div class="flex items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors animate-slide-in">
               <div class="relative">
-                <img [src]="item.imageUrl" alt="{{ item.name }}" class="w-20 h-20 object-cover rounded-lg shadow-md">
+                <img [src]="item.imageUrl" alt="{{ item.name }}" class="w-32 h-32 object-cover rounded-lg shadow-md">
                 <div class="absolute -top-2 -right-2 bg-blue-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
                   {{ item.quantity }}
                 </div>

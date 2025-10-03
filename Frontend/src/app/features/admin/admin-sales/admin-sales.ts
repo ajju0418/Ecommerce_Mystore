@@ -21,17 +21,29 @@ export class AdminSales implements OnInit {
   loadOrders() {
     this.orderService.getAllOrders().subscribe({
       next: (orders: Order[]) => {
-        // Map userName to customerInfo.name for template compatibility
-        this.orders = (orders || []).map(order => ({
-          ...order,
-          customerInfo: {
-            ...order.customerInfo,
-            name: order.userName || order.customerInfo?.name || order.userEmail || 'N/A', // Use userName, fallback to customerInfo.name, then userEmail
-            email: order.userEmail || '',
-            phone: order.userPhone || '',
-            address: order.customerInfo?.address || ''
-          }
-        }));
+        // Map customer information from backend fields
+        this.orders = (orders || []).map(order => {
+          const orderAny = order as any;
+          console.log('=== ADMIN SALES LOAD ORDERS DEBUG ===');
+          console.log('AdminSales: Raw order from backend:', orderAny);
+          console.log('AdminSales: order.orderId:', orderAny.orderId);
+          console.log('AdminSales: order.id:', orderAny.id);
+          console.log('AdminSales: order.customerName:', orderAny.customerName);
+          console.log('AdminSales: order.userName:', orderAny.userName);
+          console.log('AdminSales: order.userId:', orderAny.userId);
+          console.log('AdminSales: Final mapped order.id:', orderAny.orderId || orderAny.id);
+          
+          return {
+            ...order,
+            customerInfo: {
+              name: orderAny.customerName || orderAny.userName || order.userName || `Customer ${orderAny.userId || order.userId || 'Unknown'}`,
+              email: orderAny.customerEmail || orderAny.userEmail || order.userEmail || '',
+              phone: orderAny.customerPhone || orderAny.userPhone || order.userPhone || '',
+              contact: parseInt(orderAny.customerPhone || orderAny.userPhone || order.userPhone || '0'),
+              address: orderAny.customerAddress || ''
+            }
+          };
+        });
       },
       error: (error: any) => {
         console.error('Failed to load orders:', error);
@@ -47,7 +59,6 @@ export class AdminSales implements OnInit {
 
   getStatusClass(status: string): string {
     switch (status.toLowerCase()) {
-      case 'delivered': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-green-100 text-green-800';
       case 'processing': return 'bg-yellow-100 text-yellow-800';
       case 'pending': return 'bg-gray-100 text-gray-800';
@@ -61,7 +72,7 @@ export class AdminSales implements OnInit {
   }
 
   getCompletedOrders(): number {
-    return this.orders.filter(order => order.status === 'delivered').length;
+    return this.orders.filter(order => order.status?.toLowerCase() === 'completed').length;
   }
 
   getAverageOrderValue(): number {
@@ -79,7 +90,7 @@ export class AdminSales implements OnInit {
 
   acceptOrder(order: Order) {
     if (confirm(`Accept order ${order.id}?`) && order.id) {
-      this.orderService.updateOrderStatus(order.id, 'processing').subscribe({
+      this.orderService.updateOrderStatus(order.id, 'PROCESSING').subscribe({
         next: () => this.loadOrders(),
         error: (error: any) => console.error('Failed to update order status:', error)
       });
@@ -88,7 +99,7 @@ export class AdminSales implements OnInit {
 
   rejectOrder(order: Order) {
     if (confirm(`Reject order ${order.id}?`) && order.id) {
-      this.orderService.updateOrderStatus(order.id, 'cancelled').subscribe({
+      this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe({
         next: () => this.loadOrders(),
         error: (error: any) => console.error('Failed to update order status:', error)
       });
@@ -96,19 +107,30 @@ export class AdminSales implements OnInit {
   }
 
   completeOrder(order: Order) {
+    console.log('=== ADMIN SALES COMPLETE ORDER DEBUG ===');
+    console.log('AdminSales: Complete order called for:', order);
+    console.log('AdminSales: Order ID being used:', order.id);
+    console.log('AdminSales: Order object keys:', Object.keys(order));
+    
     if (confirm(`Mark order ${order.id} as completed?`) && order.id) {
-      this.orderService.updateOrderStatus(order.id, 'completed').subscribe({
+      this.orderService.updateOrderStatus(order.id, 'COMPLETED').subscribe({
         next: (response) => {
           if (response.success) {
             alert('Order marked as completed!');
             this.loadOrders();
           } else {
             alert('Failed to update order: ' + response.message);
+            console.error('Update order response:', response);
           }
         },
         error: (error: any) => {
-          let msg = error?.error?.message || error?.message || 'Failed to update order status';
-          alert('Error: ' + msg);
+          if (error?.message?.includes('400') || error?.message?.includes('Bad Request') || error?.message?.includes('not found')) {
+            alert('Order not found in database. Refreshing order list...');
+            this.loadOrders();
+          } else {
+            let msg = error?.error?.message || error?.message || 'Failed to update order status';
+            alert('Error: ' + msg);
+          }
           console.error('Failed to update order status:', error);
         }
       });

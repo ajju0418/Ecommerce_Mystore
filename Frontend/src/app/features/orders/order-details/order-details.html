@@ -35,15 +35,19 @@
             </div>
             <div class="info-item">
               <span class="label">Name:</span>
-              <span class="value">{{ order.userName || 'N/A' }}</span>
+              <span class="value">{{ order.customerInfo.name || 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="label">Email:</span>
-              <span class="value">{{ order.userEmail || 'N/A' }}</span>
+              <span class="value">{{ order.customerInfo.email || 'N/A' }}</span>
             </div>
             <div class="info-item">
               <span class="label">Phone:</span>
-              <span class="value">{{ order.userPhone || 'N/A' }}</span>
+              <span class="value">{{ order.customerInfo.phone || 'N/A' }}</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Address:</span>
+              <span class="value">{{ order.customerInfo.address || 'N/A' }}</span>
             </div>
           </div>
 

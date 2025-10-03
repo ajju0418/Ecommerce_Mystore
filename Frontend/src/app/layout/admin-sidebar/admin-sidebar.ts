@@ -48,10 +48,10 @@ export class AdminSidebar implements OnInit {
     this.orderService.getAllOrders().subscribe((orders: Order[]) => {
       this.pendingOrdersCount = orders.filter((order: Order) => order.status === 'pending').length;
       
-      // Update the badge for orders menu item
-      const ordersItem = this.menuItems.find(item => item.id === 'orders');
-      if (ordersItem) {
-        ordersItem.badge = this.pendingOrdersCount > 0 ? this.pendingOrdersCount.toString() : undefined;
+      // Update the badge for sales menu item
+      const salesItem = this.menuItems.find(item => item.id === 'sales');
+      if (salesItem) {
+        salesItem.badge = this.pendingOrdersCount > 0 ? this.pendingOrdersCount.toString() : undefined;
       }
     });
   }

@@ -1,6 +1,8 @@
 package com.estore.admin.service;
 
-import com.estore.admin.dto.OrderStatusUpdateDto;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -9,8 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.estore.admin.dto.OrderStatusUpdateDto;
 
 @Service
 public class OrderManagementService {
@@ -75,25 +76,25 @@ public class OrderManagementService {
         return restTemplate.exchange(url, HttpMethod.DELETE, null, Object.class).getBody();
     }
     
-    public Object markOrderAsDelivered(String orderId) {
+    public Object markOrderAsCompleted(String orderId) {
         try {
-            System.out.println("OrderManagementService: Marking order as delivered: " + orderId);
+            System.out.println("OrderManagementService: Marking order as completed: " + orderId);
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             
             Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("status", "DELIVERED");
+            requestBody.put("status", "COMPLETED");
             
             HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
             
             String url = "http://order-service/api/orders/" + orderId + "/status";
             Object result = restTemplate.exchange(url, HttpMethod.PUT, request, Object.class).getBody();
             
-            System.out.println("OrderManagementService: Successfully marked order as delivered");
+            System.out.println("OrderManagementService: Successfully marked order as completed");
             return result;
         } catch (Exception e) {
-            System.out.println("OrderManagementService: Failed to mark order as delivered: " + e.getMessage());
+            System.out.println("OrderManagementService: Failed to mark order as completed: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }

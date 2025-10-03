@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService, Order } from '../../../core/services/order-service';
 import { UserService } from '../../../core/services/user-service';
+import { Header } from '../../../layout/header/header';
+import { Footer } from '../../../layout/footer/footer';
 
 @Component({
   selector: 'app-track-order',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Header, Footer],
   templateUrl: './track-order.html',
   styleUrls: ['./track-order.css']
 })
@@ -107,10 +109,18 @@ export class TrackOrderComponent implements OnInit {
       case 'PROCESSING': return 'Order is being prepared for shipment';
       case 'SHIPPED': return 'Order has been shipped and is on the way';
       case 'DELIVERED': return 'Order delivered successfully';
-      case 'COMPLETED': return 'Order completed successfully';
+      case 'COMPLETED': return 'Order delivered successfully'; // Admin COMPLETED shows as delivered
       case 'CANCELLED': return 'Order has been cancelled';
       case 'FAILED': return 'Order processing failed';
       default: return 'Order status unknown';
     }
+  }
+
+  // Get display status for UI - COMPLETED becomes "delivered"
+  getDisplayStatus(): string {
+    if (this.trackingStatus?.toUpperCase() === 'COMPLETED') {
+      return 'delivered';
+    }
+    return this.trackingStatus || 'pending';
   }
 }

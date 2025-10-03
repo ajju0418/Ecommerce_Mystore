@@ -5,6 +5,7 @@ import java.util.List;
 public class CheckoutDto {
     private Long userId;
     private List<CheckoutItemDto> items;
+    private CustomerInfoDto customerInfo;
 
     public CheckoutDto() {}
 
@@ -18,4 +19,7 @@ public class CheckoutDto {
     
     public List<CheckoutItemDto> getItems() { return items; }
     public void setItems(List<CheckoutItemDto> items) { this.items = items; }
+    
+    public CustomerInfoDto getCustomerInfo() { return customerInfo; }
+    public void setCustomerInfo(CustomerInfoDto customerInfo) { this.customerInfo = customerInfo; }
 }

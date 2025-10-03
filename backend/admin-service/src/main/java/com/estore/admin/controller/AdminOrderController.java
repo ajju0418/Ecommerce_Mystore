@@ -1,10 +1,17 @@
 package com.estore.admin.controller;
 
-import com.estore.admin.dto.OrderStatusUpdateDto;
-import com.estore.admin.service.OrderManagementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.estore.admin.dto.OrderStatusUpdateDto;
+import com.estore.admin.service.OrderManagementService;
 
 @RestController
 @RequestMapping("/api/admin/orders")
@@ -101,15 +108,15 @@ public class AdminOrderController {
         }
     }
     
-    @PutMapping("/mark-delivered/{orderId}")
-    public ResponseEntity<Object> markOrderAsDelivered(@PathVariable String orderId) {
+    @PutMapping("/mark-completed/{orderId}")
+    public ResponseEntity<Object> markOrderAsCompleted(@PathVariable String orderId) {
         try {
-            System.out.println("AdminOrderController: Marking order as delivered: " + orderId);
-            Object result = orderManagementService.markOrderAsDelivered(orderId);
-            System.out.println("AdminOrderController: Successfully marked order as delivered");
+            System.out.println("AdminOrderController: Marking order as completed: " + orderId);
+            Object result = orderManagementService.markOrderAsCompleted(orderId);
+            System.out.println("AdminOrderController: Successfully marked order as completed");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
-            System.out.println("AdminOrderController: Error marking order as delivered: " + e.getMessage());
+            System.out.println("AdminOrderController: Error marking order as completed: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }

@@ -41,11 +41,14 @@ export class AdminCustomers implements OnInit {
       next: (users: User[]) => {
         this.orderService.getAllOrders().subscribe({
           next: (orders: Order[]) => {
-            // Aggregate orders for each customer by userEmail
+            // Aggregate orders for each customer by customerEmail or userEmail
             const orderStats = new Map<string, { orders: number; totalSpent: number }>();
             (orders || []).forEach((order: Order) => {
-              if (!order || !order.userEmail) return;
-              const email = order.userEmail;
+              if (!order) return;
+              const orderAny = order as any;
+              const email = orderAny.customerEmail || order.userEmail;
+              if (!email) return;
+              
               if (!orderStats.has(email)) {
                 orderStats.set(email, { orders: 0, totalSpent: 0 });
               }

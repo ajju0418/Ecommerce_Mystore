@@ -83,7 +83,7 @@
         </thead>
         <tbody>
           <tr *ngFor="let order of orders">
-            <td><strong>{{ order.id.substring(0, 12) }}...</strong></td>
+            <td><strong>{{ order.id }}</strong></td>
             <td>{{ order.customerInfo.name || 'N/A' }}</td>
             <td>{{ order.items.length || 0 }} items</td>
             <td><strong style="color: #10b981;">₹{{ order.totalAmount }}</strong></td>
