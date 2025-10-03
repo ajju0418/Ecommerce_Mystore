@@ -213,18 +213,25 @@ export class CartService {
 
   clearCart(userId: number): Observable<any> {
     return new Observable(observer => {
+      console.log('Clearing cart for user:', userId);
       this.http.delete(`${this.apiUrl}/user/${userId}/clear`)
         .pipe(
           catchError(this.handleError.bind(this))
         )
         .subscribe({
           next: (response) => {
+            console.log('Cart cleared from backend:', response);
+            // Immediately update local state
             this.cartItemsSubject.next([]);
             this.cartCountSubject.next(0);
             observer.next({ success: true, message: 'Cart cleared' });
             observer.complete();
           },
           error: (error) => {
+            console.error('Failed to clear cart from backend:', error);
+            // Still clear local state even if backend fails
+            this.cartItemsSubject.next([]);
+            this.cartCountSubject.next(0);
             observer.next({ success: false, message: 'Failed to clear cart' });
             observer.complete();
           }

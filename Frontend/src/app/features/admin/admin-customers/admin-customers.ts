@@ -62,11 +62,11 @@ export class AdminCustomers implements OnInit {
               const stats = orderStats.get(user.email) || { orders: 0, totalSpent: 0 };
               return {
                 id: user.id ?? 0,
-                name: user.username,
+                name: user.name || user.username,
                 email: user.email,
                 phone: user.phone,
                 status: 'Active',
-                joinDate: '',
+                joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
                 orders: stats.orders,
                 totalSpent: stats.totalSpent
               };
@@ -76,11 +76,11 @@ export class AdminCustomers implements OnInit {
             // Orders failed: show users without stats
             this.customers = (users || []).map((u: User) => ({
               id: u.id ?? 0,
-              name: u.username,
+              name: u.name || u.username,
               email: u.email,
               phone: u.phone,
               status: 'Active',
-              joinDate: '',
+              joinDate: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A',
               orders: 0,
               totalSpent: 0
             }));

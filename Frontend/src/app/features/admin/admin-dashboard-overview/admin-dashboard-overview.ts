@@ -41,17 +41,20 @@ export class AdminDashboardOverview implements OnInit {
       this.productService.getProducts().toPromise(),
       this.userService.getAllUsers().toPromise()
     ]).then(([orders, products, customers]) => {
-      // Map userName to customerInfo.name for template compatibility
-      this.orders = (orders || []).map(order => ({
-        ...order,
-        customerInfo: {
-          ...order.customerInfo,
-          name: order.userName || 'N/A',
-          email: order.userEmail || '',
-          phone: order.userPhone || '',
-          address: order.customerInfo?.address || ''
-        }
-      }));
+      // Map customer information from backend fields
+      this.orders = (orders || []).map(order => {
+        const orderAny = order as any;
+        return {
+          ...order,
+          customerInfo: {
+            name: orderAny.customerName || order.userName || 'N/A',
+            email: orderAny.customerEmail || order.userEmail || '',
+            phone: orderAny.customerPhone || order.userPhone || '',
+            contact: parseInt(orderAny.customerPhone || order.userPhone || '0'),
+            address: orderAny.customerAddress || ''
+          }
+        };
+      });
       
       this.products = products || [];
       this.customers = customers || [];
@@ -76,12 +79,75 @@ export class AdminDashboardOverview implements OnInit {
   private updateStats() {
     const totalSales = this.orders.reduce((sum, order) => sum + order.totalAmount, 0);
     
+    // Calculate current month vs previous month
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    const currentMonthOrders = this.orders.filter(order => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+    });
+    
+    const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    
+    const previousMonthOrders = this.orders.filter(order => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === previousMonth && orderDate.getFullYear() === previousYear;
+    });
+    
+    // Calculate percentages
+    const currentSales = currentMonthOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const previousSales = previousMonthOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const salesChange = this.calculatePercentageChange(previousSales, currentSales);
+    
+    const ordersChange = this.calculatePercentageChange(previousMonthOrders.length, currentMonthOrders.length);
+    
+    // Calculate new customers this month vs last month
+    const newCustomersThisMonth = this.customers.filter(customer => {
+      if (!customer.createdAt) return false;
+      const customerDate = new Date(customer.createdAt);
+      return customerDate.getMonth() === currentMonth && customerDate.getFullYear() === currentYear;
+    }).length;
+    
+    const newCustomersLastMonth = this.customers.filter(customer => {
+      if (!customer.createdAt) return false;
+      const customerDate = new Date(customer.createdAt);
+      return customerDate.getMonth() === previousMonth && customerDate.getFullYear() === previousYear;
+    }).length;
+    
+    const customersChange = this.calculatePercentageChange(newCustomersLastMonth, newCustomersThisMonth);
+    
+    // Calculate active products (products that were ordered this month)
+    const activeProductsThisMonth = new Set();
+    const activeProductsLastMonth = new Set();
+    
+    currentMonthOrders.forEach(order => {
+      order.items.forEach((item: any) => activeProductsThisMonth.add(item.id));
+    });
+    
+    previousMonthOrders.forEach(order => {
+      order.items.forEach((item: any) => activeProductsLastMonth.add(item.id));
+    });
+    
+    const productsChange = this.calculatePercentageChange(activeProductsLastMonth.size, activeProductsThisMonth.size);
+    
     this.stats = [
-      { title: 'Total Sales', value: `₹${totalSales.toLocaleString()}`, change: '+12.5%', icon: '💰', color: 'bg-green-500' },
-      { title: 'Total Orders', value: this.orders.length.toString(), change: '+8.2%', icon: '📦', color: 'bg-blue-500' },
-      { title: 'Total Customers', value: this.customers.length.toString(), change: '+15.3%', icon: '👥', color: 'bg-purple-500' },
-      { title: 'Total Products', value: this.products.length.toString(), change: '+5.7%', icon: '🏷️', color: 'bg-orange-500' }
+      { title: 'Total Sales', value: `₹${totalSales.toLocaleString()}`, change: salesChange, icon: '💰', color: 'bg-green-500' },
+      { title: 'Total Orders', value: this.orders.length.toString(), change: ordersChange, icon: '📦', color: 'bg-blue-500' },
+      { title: 'Total Customers', value: this.customers.length.toString(), change: customersChange, icon: '👥', color: 'bg-purple-500' },
+      { title: 'Total Products', value: this.products.length.toString(), change: productsChange, icon: '🏷️', color: 'bg-orange-500' }
     ];
+  }
+  
+  private calculatePercentageChange(previous: number, current: number): string {
+    if (previous === 0) {
+      return current > 0 ? '+100%' : '0%';
+    }
+    const change = ((current - previous) / previous) * 100;
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${change.toFixed(1)}%`;
   }
 
   private updateRecentOrders() {

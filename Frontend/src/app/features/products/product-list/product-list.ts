@@ -122,8 +122,10 @@ export class ProductListComponent implements OnInit {
       }
       if (collection) {
         this.selectedCollection = collection;
+        this.loadProductsByCollection(collection);
+      } else {
+        this.loadProducts();
       }
-      this.loadProducts();
     });
   }
 
@@ -157,6 +159,34 @@ export class ProductListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load products:', error);
+        this.products = [];
+        this.filteredProducts = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  loadProductsByCollection(collection: string): void {
+    this.loading = true;
+    this.productService.getProductsByCollection(collection).subscribe({
+      next: (products) => {
+        this.products = products.map(p => ({
+          id: p.id ?? '',
+          name: p.name ?? '',
+          category: p.category ?? '',
+          brand: p.brand ?? '',
+          price: p.price ?? 0,
+          imageUrl: p.imageUrl ?? '',
+          rating: p.rating ?? 0,
+          reviewCount: 0,
+          collection: p.collection ?? '',
+          gender: (p as any).gender ?? ''
+        }));
+        this.filteredProducts = [...this.products]; // Show all products from collection
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load products by collection:', error);
         this.products = [];
         this.filteredProducts = [];
         this.loading = false;
@@ -332,11 +362,16 @@ export class ProductListComponent implements OnInit {
       (this as any)._routeGender = '';
       this.minPrice = 0;
       this.maxPrice = 1000;
+      this.selectedCollection = '';
+      this.loadProducts(); // Reload all products
     } else {
       this.selectedCollection = collection === this.selectedCollection ? '' : collection;
+      if (this.selectedCollection) {
+        this.loadProductsByCollection(this.selectedCollection);
+      } else {
+        this.loadProducts();
+      }
     }
-    
-    this.applyFilters();
     
     // Update URL with query params
     const queryParams: any = {};

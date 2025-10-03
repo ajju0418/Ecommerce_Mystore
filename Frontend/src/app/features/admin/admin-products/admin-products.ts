@@ -37,7 +37,7 @@ export class AdminProducts implements OnInit {
     status: 'ACTIVE'
   };
   categories = ['Shirts', 'T-Shirts', 'Jeans', 'Jackets', 'Shoes', 'Accessories', 'Pants', 'Sweaters', 'Hoodies'];
-  collections = ['New Arrivals', 'Premium', 'Casual', 'Sports', 'Men\'s', 'Women\'s', 'Kids', 'Accessories'];
+  collections = ['New Arrivals', 'Premium', 'Casual', 'Sports', 'Men\'s', 'Women\'s',  'Accessories'];
 
   constructor(
 

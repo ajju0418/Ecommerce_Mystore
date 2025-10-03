@@ -11,6 +11,12 @@ import { OrderService, Order } from '../../../core/services/order-service';
 })
 export class AdminSales implements OnInit {
   orders: Order[] = [];
+  stats = {
+    ordersChange: '+0%',
+    revenueChange: '+0%',
+    completedChange: '+0%',
+    avgOrderChange: '+0%'
+  };
 
   constructor(private orderService: OrderService) {}
 
@@ -44,6 +50,7 @@ export class AdminSales implements OnInit {
             }
           };
         });
+        this.updateStats();
       },
       error: (error: any) => {
         console.error('Failed to load orders:', error);
@@ -160,5 +167,51 @@ export class AdminSales implements OnInit {
       case 'failed': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  private updateStats() {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+    const currentMonthOrders = this.orders.filter(order => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear;
+    });
+
+    const lastMonthOrders = this.orders.filter(order => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate.getMonth() === lastMonth && orderDate.getFullYear() === lastMonthYear;
+    });
+
+    // Calculate changes
+    const ordersChange = this.calculatePercentageChange(lastMonthOrders.length, currentMonthOrders.length);
+    const currentRevenue = currentMonthOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const lastRevenue = lastMonthOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const revenueChange = this.calculatePercentageChange(lastRevenue, currentRevenue);
+    
+    const currentCompleted = currentMonthOrders.filter(order => order.status?.toLowerCase() === 'completed').length;
+    const lastCompleted = lastMonthOrders.filter(order => order.status?.toLowerCase() === 'completed').length;
+    const completedChange = this.calculatePercentageChange(lastCompleted, currentCompleted);
+    
+    const currentAvg = currentMonthOrders.length > 0 ? currentRevenue / currentMonthOrders.length : 0;
+    const lastAvg = lastMonthOrders.length > 0 ? lastRevenue / lastMonthOrders.length : 0;
+    const avgOrderChange = this.calculatePercentageChange(lastAvg, currentAvg);
+
+    this.stats = {
+      ordersChange,
+      revenueChange,
+      completedChange,
+      avgOrderChange
+    };
+  }
+
+  private calculatePercentageChange(oldValue: number, newValue: number): string {
+    if (oldValue === 0) return newValue > 0 ? '+100%' : '0%';
+    const change = ((newValue - oldValue) / oldValue) * 100;
+    const sign = change >= 0 ? '+' : '';
+    return `${sign}${Math.round(change)}%`;
   }
 }

@@ -127,7 +127,23 @@ export class PaymentComponent implements OnInit {
                 console.log('Payment step set to:', this.paymentStep, 'Status:', this.paymentStatus);
                 
                 // Clear cart and redirect
-                this.cartService.clearCart(currentUser.id!).subscribe();
+                this.cartService.clearCart(currentUser.id!).subscribe({
+                  next: (clearResponse) => {
+                    console.log('Cart cleared successfully:', clearResponse);
+                    // Force immediate cart reload to update UI
+                    setTimeout(() => {
+                      this.cartService.loadUserCart(currentUser.id!);
+                    }, 100);
+                  },
+                  error: (clearError) => {
+                    console.error('Failed to clear cart:', clearError);
+                    // Try to clear cart again if failed
+                    setTimeout(() => {
+                      this.cartService.clearCart(currentUser.id!).subscribe();
+                      this.cartService.loadUserCart(currentUser.id!);
+                    }, 500);
+                  }
+                });
                 this.orderService.clearPaymentOrder();
                 
                 setTimeout(() => {

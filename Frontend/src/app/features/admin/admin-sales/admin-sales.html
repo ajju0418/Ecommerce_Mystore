@@ -18,7 +18,10 @@
       <div class="stat-content">
         <div class="stat-title">Total Orders</div>
         <div class="stat-value">{{ orders.length }}</div>
-        <div class="stat-change trend-up">+12% this month</div>
+        <div class="stat-change" [ngClass]="{
+          'trend-up': stats.ordersChange.startsWith('+'),
+          'trend-down': stats.ordersChange.startsWith('-')
+        }">{{ stats.ordersChange }} this month</div>
       </div>
       <div class="stat-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8);">
         <i class="bi bi-bag-check"></i>
@@ -29,7 +32,10 @@
       <div class="stat-content">
         <div class="stat-title">Total Revenue</div>
         <div class="stat-value">₹{{ getTotalSales().toFixed(0) }}</div>
-        <div class="stat-change trend-up">+8% this month</div>
+        <div class="stat-change" [ngClass]="{
+          'trend-up': stats.revenueChange.startsWith('+'),
+          'trend-down': stats.revenueChange.startsWith('-')
+        }">{{ stats.revenueChange }} this month</div>
       </div>
       <div class="stat-icon" style="background: linear-gradient(135deg, #10b981, #059669);">
         <i class="bi bi-currency-rupee"></i>
@@ -40,7 +46,10 @@
       <div class="stat-content">
         <div class="stat-title">Completed Orders</div>
         <div class="stat-value">{{ getCompletedOrders() }}</div>
-        <div class="stat-change trend-up">+15% this month</div>
+        <div class="stat-change" [ngClass]="{
+          'trend-up': stats.completedChange.startsWith('+'),
+          'trend-down': stats.completedChange.startsWith('-')
+        }">{{ stats.completedChange }} this month</div>
       </div>
       <div class="stat-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
         <i class="bi bi-check-circle"></i>
@@ -51,7 +60,10 @@
       <div class="stat-content">
         <div class="stat-title">Avg Order Value</div>
         <div class="stat-value">₹{{ getAverageOrderValue().toFixed(0) }}</div>
-        <div class="stat-change trend-down">-3% this month</div>
+        <div class="stat-change" [ngClass]="{
+          'trend-up': stats.avgOrderChange.startsWith('+'),
+          'trend-down': stats.avgOrderChange.startsWith('-')
+        }">{{ stats.avgOrderChange }} this month</div>
       </div>
       <div class="stat-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
         <i class="bi bi-graph-up"></i>
@@ -84,7 +96,7 @@
         <tbody>
           <tr *ngFor="let order of orders">
             <td><strong>{{ order.id }}</strong></td>
-            <td>{{ order.customerInfo.name || 'N/A' }}</td>
+            <td>{{ order.customerInfo.name  }}</td>
             <td>{{ order.items.length || 0 }} items</td>
             <td><strong style="color: #10b981;">₹{{ order.totalAmount }}</strong></td>
             <td>{{ formatDate(order.orderDate) }}</td>
