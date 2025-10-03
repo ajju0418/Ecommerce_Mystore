@@ -14,10 +14,10 @@
       <nav>
         <ul class="nav-list">
           <li><a *ngIf="router.url !== '/home'"  routerLink="/home" class="nav-link home-link">Home</a></li>
-          <li><a routerLink="/products" class="nav-link">Men's</a></li>
-          <li><a routerLink="/products" class="nav-link">Women's</a></li>
-          <li><a routerLink="/products-page" class="nav-link">Kids</a></li>
-          <li><a routerLink="/products-page" class="nav-link">Accessories</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{gender: 'men'}" class="nav-link">Men's</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{gender: 'women'}" class="nav-link">Women's</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{category: 'sports'}" class="nav-link">Sports</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{category: 'accessories'}" class="nav-link">Accessories</a></li>
           <li><a routerLink="/deals-of-the-day" class="nav-link deals-link">Deals of the Day</a></li>
         </ul>
       </nav>

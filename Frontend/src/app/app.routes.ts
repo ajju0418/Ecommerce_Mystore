@@ -30,6 +30,7 @@ export const routes: Routes = [
 
   // Product routes
   { path: 'products', component: ProductListComponent },
+  { path: 'products-page', component: ProductListComponent },
   // Removed product details route per requirement
 
   // Protected user routes

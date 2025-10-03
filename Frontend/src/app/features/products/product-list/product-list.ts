@@ -217,11 +217,12 @@ export class ProductListComponent implements OnInit {
       const prodCollection = ((product as any).collection || '').toLowerCase();
       const prodGender = ((product as any).gender || '').toLowerCase();
 
+      // Exact match for category instead of includes
       const categoryMatch = this.selectedCategories.length === 0 || 
-        this.selectedCategories.map(c => c.toLowerCase()).includes(prodCategory);
+        this.selectedCategories.some(c => prodCategory === c.toLowerCase());
 
       const brandMatch = this.selectedBrands.length === 0 || 
-        this.selectedBrands.map(b => b.toLowerCase()).includes(prodBrand);
+        this.selectedBrands.some(b => prodBrand === b.toLowerCase());
 
       const priceMatch = product.price >= this.minPrice && product.price <= this.maxPrice;
 
@@ -263,6 +264,17 @@ export class ProductListComponent implements OnInit {
       this.selectedCategories = this.selectedCategories.filter(c => c !== category);
     }
     this.applyFilters();
+    
+    // Update URL with query params
+    const queryParams: any = {};
+    if (this.selectedCategories.length === 1) {
+      queryParams.category = this.selectedCategories[0];
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    });
   }
 
   onBrandChange(brand: string, checked: boolean): void {
@@ -311,8 +323,31 @@ export class ProductListComponent implements OnInit {
   }
 
   onCollectionChange(collection: string): void {
-    this.selectedCollection = collection === this.selectedCollection ? '' : collection;
+    // Reset all filters when "All Products" is selected
+    if (collection === '') {
+      this.selectedCategories = [];
+      this.selectedBrands = [];
+      this.selectedRatings = [];
+      this.selectedDiscounts = [];
+      (this as any)._routeGender = '';
+      this.minPrice = 0;
+      this.maxPrice = 1000;
+    } else {
+      this.selectedCollection = collection === this.selectedCollection ? '' : collection;
+    }
+    
     this.applyFilters();
+    
+    // Update URL with query params
+    const queryParams: any = {};
+    if (this.selectedCollection) {
+      queryParams.collection = this.selectedCollection;
+    }
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge'
+    });
   }
 
   onPriceChange(): void {
