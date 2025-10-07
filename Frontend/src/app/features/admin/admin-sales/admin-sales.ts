@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OrderService, Order } from '../../../core/services/order-service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-admin-sales',
@@ -9,7 +10,7 @@ import { OrderService, Order } from '../../../core/services/order-service';
   templateUrl: './admin-sales.html',
   styleUrl: './admin-sales.css'
 })
-export class AdminSales implements OnInit {
+export class AdminSales implements OnInit, OnDestroy {
   orders: Order[] = [];
   stats = {
     ordersChange: '+0%',
@@ -17,11 +18,40 @@ export class AdminSales implements OnInit {
     completedChange: '+0%',
     avgOrderChange: '+0%'
   };
+  private subscription = new Subscription();
 
   constructor(private orderService: OrderService) {}
 
   ngOnInit() {
-    this.loadOrders();
+    // Subscribe to real-time order updates
+    this.subscription.add(
+      this.orderService.getAllOrders().subscribe({
+        next: (orders) => {
+          this.orders = (orders || []).map(order => {
+            const orderAny = order as any;
+            return {
+              ...order,
+              customerInfo: {
+                name: orderAny.customerName || orderAny.userName || order.userName || `Customer ${orderAny.userId || order.userId || 'Unknown'}`,
+                email: orderAny.customerEmail || orderAny.userEmail || order.userEmail || '',
+                phone: orderAny.customerPhone || orderAny.userPhone || order.userPhone || '',
+                contact: parseInt(orderAny.customerPhone || orderAny.userPhone || order.userPhone || '0'),
+                address: orderAny.customerAddress || ''
+              }
+            };
+          });
+          this.updateStats();
+        },
+        error: (error) => {
+          console.error('Failed to load orders:', error);
+          this.orders = [];
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   loadOrders() {
@@ -98,8 +128,17 @@ export class AdminSales implements OnInit {
   acceptOrder(order: Order) {
     if (confirm(`Accept order ${order.id}?`) && order.id) {
       this.orderService.updateOrderStatus(order.id, 'PROCESSING').subscribe({
-        next: () => this.loadOrders(),
-        error: (error: any) => console.error('Failed to update order status:', error)
+        next: (response) => {
+          if (response.success) {
+            alert('Order accepted successfully!');
+          } else {
+            alert('Failed to accept order: ' + response.message);
+          }
+        },
+        error: (error: any) => {
+          console.error('Failed to update order status:', error);
+          alert('Error accepting order');
+        }
       });
     }
   }
@@ -107,8 +146,17 @@ export class AdminSales implements OnInit {
   rejectOrder(order: Order) {
     if (confirm(`Reject order ${order.id}?`) && order.id) {
       this.orderService.updateOrderStatus(order.id, 'CANCELLED').subscribe({
-        next: () => this.loadOrders(),
-        error: (error: any) => console.error('Failed to update order status:', error)
+        next: (response) => {
+          if (response.success) {
+            alert('Order rejected successfully!');
+          } else {
+            alert('Failed to reject order: ' + response.message);
+          }
+        },
+        error: (error: any) => {
+          console.error('Failed to update order status:', error);
+          alert('Error rejecting order');
+        }
       });
     }
   }
@@ -124,7 +172,6 @@ export class AdminSales implements OnInit {
         next: (response) => {
           if (response.success) {
             alert('Order marked as completed!');
-            this.loadOrders();
           } else {
             alert('Failed to update order: ' + response.message);
             console.error('Update order response:', response);
@@ -132,8 +179,7 @@ export class AdminSales implements OnInit {
         },
         error: (error: any) => {
           if (error?.message?.includes('400') || error?.message?.includes('Bad Request') || error?.message?.includes('not found')) {
-            alert('Order not found in database. Refreshing order list...');
-            this.loadOrders();
+            alert('Order not found in database.');
           } else {
             let msg = error?.error?.message || error?.message || 'Failed to update order status';
             alert('Error: ' + msg);
@@ -148,8 +194,14 @@ export class AdminSales implements OnInit {
   deleteOrder(order: Order) {
     if (confirm(`Delete order ${order.id}? This cannot be undone.`) && order.id) {
       this.orderService.deleteOrder(order.id).subscribe({
-        next: () => this.loadOrders(),
-        error: (error: any) => console.error('Failed to delete order:', error)
+        next: () => {
+          alert('Order deleted successfully!');
+          this.loadOrders();
+        },
+        error: (error: any) => {
+          console.error('Failed to delete order:', error);
+          alert('Error deleting order');
+        }
       });
     }
   }
@@ -214,4 +266,6 @@ export class AdminSales implements OnInit {
     const sign = change >= 0 ? '+' : '';
     return `${sign}${Math.round(change)}%`;
   }
+
+
 }

@@ -48,3 +48,7 @@ info:
     description: Shopping Cart Management Service
     version: 1.0.0
     database: estore_cart
+
+jwt:
+  secret: c3VwZXItc2VjcmV0LXN1cGVyLXNlY3JldC1zdXBlci1zZWNyZXQyNTY=
+  expirationMs: 86400000

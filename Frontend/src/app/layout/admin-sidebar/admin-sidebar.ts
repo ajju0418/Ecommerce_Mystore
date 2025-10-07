@@ -1,8 +1,9 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { OrderService, Order } from '../../core/services/order-service';
 import { UserService } from '../../core/services/user-service';
+import { Subscription } from 'rxjs';
 
 interface MenuItem {
   id: string;
@@ -19,10 +20,11 @@ interface MenuItem {
   templateUrl: './admin-sidebar.html',
   styleUrl: './admin-sidebar.css'
 })
-export class AdminSidebar implements OnInit {
+export class AdminSidebar implements OnInit, OnDestroy {
   @Output() sectionChange = new EventEmitter<string>();
   pendingOrdersCount = 0;
   userRole: string | null = null;
+  private subscription: Subscription = new Subscription();
 
   constructor(
     public router: Router,
@@ -42,18 +44,25 @@ export class AdminSidebar implements OnInit {
   ngOnInit() {
     this.updatePendingOrdersCount();
     this.userRole = this.getUserRole();
+    
+    // Subscribe to pending orders changes
+    this.subscription.add(
+      this.orderService.pendingOrdersCount$.subscribe(count => {
+        this.pendingOrdersCount = count;
+        const salesItem = this.menuItems.find(item => item.id === 'sales');
+        if (salesItem) {
+          salesItem.badge = count > 0 ? count.toString() : undefined;
+        }
+      })
+    );
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
   }
 
   updatePendingOrdersCount() {
-    this.orderService.getAllOrders().subscribe((orders: Order[]) => {
-      this.pendingOrdersCount = orders.filter((order: Order) => order.status === 'pending').length;
-      
-      // Update the badge for sales menu item
-      const salesItem = this.menuItems.find(item => item.id === 'sales');
-      if (salesItem) {
-        salesItem.badge = this.pendingOrdersCount > 0 ? this.pendingOrdersCount.toString() : undefined;
-      }
-    });
+    this.orderService.getAllOrders().subscribe();
   }
 
   isActive(route: string): boolean {

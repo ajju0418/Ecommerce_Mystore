@@ -110,11 +110,12 @@ export class UserLogin {
     const { username, phone, newPassword } = this.forgotForm.value;
     this.userService.resetPassword(username, phone, newPassword).subscribe(res => {
       if (res.success) {
-        this.resetSuccess = 'Password updated. Please sign in with your new password.';
+        this.resetSuccess = res.message || 'Password updated successfully. Please sign in with your new password.';
         setTimeout(() => {
           this.forgotMode = false;
           this.forgotForm.reset();
-        }, 1000);
+          this.resetSuccess = '';
+        }, 2000);
       } else {
         this.resetError = res.message || 'Reset failed';
       }

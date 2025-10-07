@@ -14,6 +14,7 @@ interface Product {
   category: string;
   brand: string;
   price: number;
+  originalPrice?: number;
   imageUrl: string;
   rating: number;
   reviewCount?: number;
@@ -102,6 +103,7 @@ export class ProductListComponent implements OnInit {
       const gender = (params['gender'] || '').toString();
       const category = (params['category'] || '').toString();
       const collection = (params['collection'] || '').toString();
+      const deals = (params['deals'] || '').toString();
 
       // Reset filters first
       this.selectedCategories = [];
@@ -111,8 +113,6 @@ export class ProductListComponent implements OnInit {
       this.selectedCollection = '';
 
       if (gender) {
-        // Store desired gender filter temporarily in selectedCollection to be applied in applyFilters
-        // We'll directly match gender in applyFilters using this param
         (this as any)._routeGender = gender;
       } else {
         (this as any)._routeGender = '';
@@ -120,11 +120,17 @@ export class ProductListComponent implements OnInit {
       if (category) {
         this.selectedCategories = [category];
       }
-      if (collection) {
-        this.selectedCollection = collection;
-        this.loadProductsByCollection(collection);
-      } else {
+      if (deals === 'true') {
+        (this as any)._showDeals = true;
         this.loadProducts();
+      } else {
+        (this as any)._showDeals = false;
+        if (collection) {
+          this.selectedCollection = collection;
+          this.loadProductsByCollection(collection);
+        } else {
+          this.loadProducts();
+        }
       }
     });
   }
@@ -139,6 +145,7 @@ export class ProductListComponent implements OnInit {
           category: p.category ?? '',
           brand: p.brand ?? '',
           price: p.price ?? 0,
+          originalPrice: (p as any).originalPrice ?? 0,
           imageUrl: p.imageUrl ?? '',
           rating: p.rating ?? 0,
           reviewCount: 0,
@@ -176,6 +183,7 @@ export class ProductListComponent implements OnInit {
           category: p.category ?? '',
           brand: p.brand ?? '',
           price: p.price ?? 0,
+          originalPrice: (p as any).originalPrice ?? 0,
           imageUrl: p.imageUrl ?? '',
           rating: p.rating ?? 0,
           reviewCount: 0,
@@ -241,13 +249,22 @@ export class ProductListComponent implements OnInit {
 
   applyFilters(): void {
     const routeGender = ((this as any)._routeGender || '').toLowerCase();
+    const showDeals = (this as any)._showDeals || false;
+    
     this.filteredProducts = this.products.filter(product => {
       const prodCategory = (product.category || '').toLowerCase();
       const prodBrand = (product.brand || '').toLowerCase();
       const prodCollection = ((product as any).collection || '').toLowerCase();
       const prodGender = ((product as any).gender || '').toLowerCase();
 
-      // Exact match for category instead of includes
+      // Deals filter - show only products with 30% or more discount
+      if (showDeals) {
+        const discountPercent = this.getDiscountPercentage(product);
+        if (discountPercent < 30) {
+          return false;
+        }
+      }
+
       const categoryMatch = this.selectedCategories.length === 0 || 
         this.selectedCategories.some(c => prodCategory === c.toLowerCase());
 
@@ -267,7 +284,12 @@ export class ProductListComponent implements OnInit {
       return categoryMatch && brandMatch && priceMatch && ratingMatch && collectionMatch && genderMatch;
     });
     
-    this.applySorting();
+    // Sort deals by highest discount first
+    if (showDeals) {
+      this.filteredProducts.sort((a, b) => this.getDiscountPercentage(b) - this.getDiscountPercentage(a));
+    } else {
+      this.applySorting();
+    }
   }
 
   applySorting(): void {
@@ -407,5 +429,12 @@ export class ProductListComponent implements OnInit {
       stars.push(i <= rating ? 'filled' : 'empty');
     }
     return stars;
+  }
+
+  getDiscountPercentage(product: any): number {
+    if (product.originalPrice && product.price && product.originalPrice > product.price) {
+      return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+    }
+    return 0;
   }
 }

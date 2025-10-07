@@ -86,4 +86,11 @@ public class Product {
     
     public String getGender() { return gender; }
     public void setGender(String gender) { this.gender = gender; }
+    
+    public Integer getDiscountPercentage() {
+        if (originalPrice != null && price != null && originalPrice > price) {
+            return (int) Math.round(((originalPrice - price) / originalPrice) * 100);
+        }
+        return 0;
+    }
 }

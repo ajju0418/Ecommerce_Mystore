@@ -31,7 +31,9 @@ export const routes: Routes = [
   // Product routes
   { path: 'products', component: ProductListComponent },
   { path: 'products-page', component: ProductListComponent },
-  // Removed product details route per requirement
+  { path: 'deals-of-the-day', component: ProductListComponent },
+  
+
 
   // Protected user routes
   { path: 'home', component: Home,},

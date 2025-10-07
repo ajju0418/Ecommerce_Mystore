@@ -65,6 +65,9 @@ export class OrderService {
   private paymentOrderSubject = new BehaviorSubject<PaymentOrder | null>(null);
   public paymentOrder$ = this.paymentOrderSubject.asObservable();
 
+  private pendingOrdersCountSubject = new BehaviorSubject<number>(0);
+  public pendingOrdersCount$ = this.pendingOrdersCountSubject.asObservable();
+
   constructor(private http: HttpClient, private productService: Productservice) {}
 
   loadUserOrders(userId: number): void {
@@ -149,7 +152,7 @@ export class OrderService {
       .pipe(
         map((orders: any[]) => {
           // Map backend data to frontend format
-          return (orders || []).map(order => ({
+          const mappedOrders = (orders || []).map(order => ({
             ...order,
             id: order.orderId || order.id,
             status: (order.status || 'pending').toString().toLowerCase() as Order['status'],
@@ -166,6 +169,12 @@ export class OrderService {
               rating: item.rating || 0
             }))
           }));
+          
+          // Update pending orders count
+          const pendingCount = mappedOrders.filter(order => order.status === 'pending').length;
+          this.pendingOrdersCountSubject.next(pendingCount);
+          
+          return mappedOrders;
         }),
         catchError(this.handleError.bind(this))
       );

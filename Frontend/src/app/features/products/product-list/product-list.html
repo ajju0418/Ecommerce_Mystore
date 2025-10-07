@@ -172,7 +172,13 @@
           <div class="product-info">
             <div class="category">{{ product.category }}</div>
             <h3 class="product-name">{{ product.name }}</h3>
-            <div class="price">₹{{ product.price.toFixed(2) }}</div>
+            <div class="price-section">
+              <div class="current-price">₹{{ product.price.toFixed(2) }}</div>
+              <div *ngIf="product.originalPrice && product.originalPrice > product.price" class="price-details">
+                <span class="original-price">₹{{ product.originalPrice.toFixed(2) }}</span>
+                <span class="discount">{{ getDiscountPercentage(product) }}% OFF</span>
+              </div>
+            </div>
             <button class="add-to-cart-btn" (click)="addToCart(product, $event)">
               <i class="cart-icon">🛒</i>
               <span>Add to Cart</span>
