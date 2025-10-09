@@ -20,8 +20,7 @@ import { CartService } from '../../../core/services/cart-Service';
 export class CartComponent implements OnInit, OnDestroy {
   cartItems: ProductListItem[] = [];
   savedItems: any[] = [];
-  couponCode: string = '';
-  appliedDiscount: number = 0;
+
   totalAmount: number = 0;
   customerName: string = '';
   customerEmail: string = '';
@@ -76,31 +75,8 @@ export class CartComponent implements OnInit, OnDestroy {
       (sum, item) => sum + (item.price * (item.quantity || 1)),
       0
     );
-
-    if (this.appliedDiscount > 0) {
-      this.totalAmount -= this.appliedDiscount;
-    }
   }
-  applyCoupon(): void {
-    const code = this.couponCode.trim().toUpperCase();
 
-    if (code === 'SAVE50') {
-      this.appliedDiscount = 50;
-      alert('Coupon applied: ₹50 off!');
-    } else if (code === 'DISCOUNT10') {
-      const subtotal = this.cartItems.reduce(
-        (sum, item) => sum + (item.price * (item.quantity || 1)),
-        0
-      );
-      this.appliedDiscount = subtotal * 0.1;
-      alert('Coupon applied: 10% off!');
-    } else {
-      alert('Invalid coupon code.');
-      this.appliedDiscount = 0;
-    }
-
-    this.calculateTotal();
-  }
 
   confirmRemove(index: number): void {
     if (window.confirm('Are you sure you want to remove this item?')) {

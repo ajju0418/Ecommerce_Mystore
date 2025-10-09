@@ -185,51 +185,38 @@ export class OrderService {
   }
 
   updateOrderStatus(id: string, status: Order['status']): Observable<any> {
-    return new Observable(observer => {
-      const url = `${this.apiUrl}/${id}/status`;
-      const body = { status: status.toString().toUpperCase() };
-      
-      console.log('=== FRONTEND ORDER STATUS UPDATE DEBUG ===');
-      console.log('OrderService: Updating order status');
-      console.log('OrderService: URL:', url);
-      console.log('OrderService: Order ID:', id);
-      console.log('OrderService: Status:', status);
-      console.log('OrderService: Request body:', body);
-      
-      this.http.put(url, body)
-        .pipe(
-          catchError(this.handleError.bind(this))
-        )
-        .subscribe({
-          next: (response: any) => {
-            console.log('OrderService: Response received:', response);
-            // Backend now returns a success wrapper with order data
-            if (response && response.success) {
-              const orders = this.ordersSubject.value.map(order =>
-                order.id === id ? { ...order, status: status.toLowerCase() as Order['status'] } : order
-              );
-              this.ordersSubject.next(orders);
-              observer.next({ success: true, message: response.message || 'Order status updated', order: response.order });
-            } else {
-              observer.next({ success: false, message: response?.message || 'Failed to update order status' });
-            }
-            observer.complete();
-          },
-          error: (error) => {
-            console.error('OrderService: Update order status error:', error);
-            console.error('OrderService: Error details:', {
-              status: error.status,
-              statusText: error.statusText,
-              url: error.url,
-              error: error.error,
-              message: error.message
-            });
-            const errorMessage = error?.error?.message || error?.message || 'Failed to update order status';
-            observer.next({ success: false, message: errorMessage });
-            observer.complete();
-          }
-        });
-    });
+    const url = `${this.apiUrl}/${id}/status`;
+    const body = { status: status.toString().toUpperCase() };
+    
+    return this.http.put(url, body).pipe(
+      map((response: any) => {
+        if (response && response.success) {
+          // Refresh all orders to get updated data
+          this.getAllOrders().subscribe(orders => {
+            // Update the orders subject with fresh data
+            const mappedOrders = orders.map(order => ({
+              ...order,
+              customerInfo: {
+                name: (order as any).customerName || (order as any).userName || order.userName || `Customer ${(order as any).userId || order.userId || 'Unknown'}`,
+                email: (order as any).customerEmail || (order as any).userEmail || order.userEmail || '',
+                phone: (order as any).customerPhone || (order as any).userPhone || order.userPhone || '',
+                contact: parseInt((order as any).customerPhone || (order as any).userPhone || order.userPhone || '0'),
+                address: (order as any).customerAddress || ''
+              }
+            }));
+            this.ordersSubject.next(mappedOrders);
+          });
+          return { success: true, message: response.message || 'Order status updated', order: response.order };
+        } else {
+          return { success: false, message: response?.message || 'Failed to update order status' };
+        }
+      }),
+      catchError((error) => {
+        console.error('OrderService: Update order status error:', error);
+        const errorMessage = error?.error?.message || error?.message || 'Failed to update order status';
+        return of({ success: false, message: errorMessage });
+      })
+    );
   }
 
   private generateOrderId(): string {

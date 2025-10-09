@@ -40,7 +40,7 @@ export class UserLogin {
 
     this.forgotForm = this.fb.group({
       username: ['', [Validators.required, Validators.minLength(3)]],
-      phone: ['', [Validators.required, Validators.minLength(6)]],
+      phone: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       newPassword: ['', [Validators.required, Validators.minLength(6)]]
     });
   }

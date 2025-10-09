@@ -19,6 +19,7 @@
             <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="form-error">
               <div *ngIf="loginForm.get('username')?.hasError('required')">Username is required</div>
               <div *ngIf="loginForm.get('username')?.hasError('minlength')">Username must be at least 3 characters</div>
+              <div *ngIf="loginForm.get('username')?.hasError('pattern')">Username must start with a letter and contain only letters and numbers</div>
             </div>
           </div>
 
@@ -70,7 +71,7 @@
               [class.error]="forgotForm.get('phone')?.invalid && forgotForm.get('phone')?.touched" />
             <div *ngIf="forgotForm.get('phone')?.invalid && forgotForm.get('phone')?.touched" class="form-error">
               <div *ngIf="forgotForm.get('phone')?.hasError('required')">Phone is required</div>
-              <div *ngIf="forgotForm.get('phone')?.hasError('minlength')">Minimum 6 digits</div>
+              <div *ngIf="forgotForm.get('phone')?.hasError('pattern')">Enter a valid 10-digit phone number</div>
             </div>
           </div>
 

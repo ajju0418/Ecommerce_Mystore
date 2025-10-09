@@ -31,7 +31,7 @@ export const routes: Routes = [
   // Product routes
   { path: 'products', component: ProductListComponent },
   { path: 'products-page', component: ProductListComponent },
-  { path: 'deals-of-the-day', component: ProductListComponent },
+  { path: 'deals-of-the-day', component: ProductListComponent, data: { deals: true } },
   
 
 

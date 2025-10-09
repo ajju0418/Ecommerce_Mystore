@@ -77,49 +77,7 @@
         </div>
       </div>
 
-      <!-- Brand -->
-      <div class="filter-section">
-        <div class="filter-header">
-          <h3>BRAND</h3>
-        </div>
-        <div class="brand-search">
-          <input type="text" 
-                 placeholder="Search Brand" 
-                 [(ngModel)]="brandSearchTerm"
-                 class="search-input">
-        </div>
-        <div class="filter-options scrollable">
-          <div *ngFor="let brand of getFilteredBrands()" class="filter-option">
-            <input type="checkbox" 
-                   [id]="'brand-' + brand"
-                   [checked]="selectedBrands.includes(brand)"
-                   (change)="onBrandChange(brand, $event.target.checked)">
-            <label [for]="'brand-' + brand">{{ brand }}</label>
-          </div>
-        </div>
-      </div>
 
-      <!-- Customer Ratings -->
-      <div class="filter-section">
-        <div class="filter-header">
-          <h3>CUSTOMER RATINGS</h3>
-        </div>
-        <div class="filter-options">
-          <div *ngFor="let rating of ratings" class="filter-option rating-option">
-            <input type="checkbox" 
-                   [id]="'rating-' + rating.value"
-                   [checked]="selectedRatings.includes(rating.value)"
-                   (change)="onRatingChange(rating.value, $event.target.checked)">
-            <label [for]="'rating-' + rating.value" class="rating-label">
-              <div class="stars">
-                <span *ngFor="let star of rating.stars" class="star filled">★</span>
-                <span *ngFor="let star of rating.emptyStars" class="star">★</span>
-              </div>
-              <span class="rating-text">{{ rating.text }}</span>
-            </label>
-          </div>
-        </div>
-      </div>
 
       <!-- Discount -->
       <div class="filter-section">
@@ -189,7 +147,7 @@
                       class="star" 
                       [class.filled]="star === 'filled'">★</span>
               </div>
-              <span class="rating-text">{{ product.rating }} ({{ product.reviewCount }})</span>
+              <span class="rating-text">{{ product.rating }}</span>
             </div>
           </div>
         </div>

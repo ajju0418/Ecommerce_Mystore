@@ -23,10 +23,35 @@ export class AdminSales implements OnInit, OnDestroy {
   constructor(private orderService: OrderService) {}
 
   ngOnInit() {
-    // Subscribe to real-time order updates
+    // Subscribe to orders observable for reactive updates
+    this.subscription.add(
+      this.orderService.orders$.subscribe(orders => {
+        if (orders.length > 0) {
+          this.orders = orders.map(order => ({
+            ...order,
+            customerInfo: order.customerInfo || {
+              name: (order as any).customerName || (order as any).userName || order.userName || `Customer ${(order as any).userId || order.userId || 'Unknown'}`,
+              email: (order as any).customerEmail || (order as any).userEmail || order.userEmail || '',
+              phone: (order as any).customerPhone || (order as any).userPhone || order.userPhone || '',
+              contact: parseInt((order as any).customerPhone || (order as any).userPhone || order.userPhone || '0'),
+              address: (order as any).customerAddress || ''
+            }
+          }));
+          this.updateStats();
+        }
+      })
+    );
+    this.loadOrders();
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
+  loadOrders() {
     this.subscription.add(
       this.orderService.getAllOrders().subscribe({
-        next: (orders) => {
+        next: (orders: Order[]) => {
           this.orders = (orders || []).map(order => {
             const orderAny = order as any;
             return {
@@ -42,51 +67,12 @@ export class AdminSales implements OnInit, OnDestroy {
           });
           this.updateStats();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Failed to load orders:', error);
           this.orders = [];
         }
       })
     );
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe();
-  }
-
-  loadOrders() {
-    this.orderService.getAllOrders().subscribe({
-      next: (orders: Order[]) => {
-        // Map customer information from backend fields
-        this.orders = (orders || []).map(order => {
-          const orderAny = order as any;
-          console.log('=== ADMIN SALES LOAD ORDERS DEBUG ===');
-          console.log('AdminSales: Raw order from backend:', orderAny);
-          console.log('AdminSales: order.orderId:', orderAny.orderId);
-          console.log('AdminSales: order.id:', orderAny.id);
-          console.log('AdminSales: order.customerName:', orderAny.customerName);
-          console.log('AdminSales: order.userName:', orderAny.userName);
-          console.log('AdminSales: order.userId:', orderAny.userId);
-          console.log('AdminSales: Final mapped order.id:', orderAny.orderId || orderAny.id);
-          
-          return {
-            ...order,
-            customerInfo: {
-              name: orderAny.customerName || orderAny.userName || order.userName || `Customer ${orderAny.userId || order.userId || 'Unknown'}`,
-              email: orderAny.customerEmail || orderAny.userEmail || order.userEmail || '',
-              phone: orderAny.customerPhone || orderAny.userPhone || order.userPhone || '',
-              contact: parseInt(orderAny.customerPhone || orderAny.userPhone || order.userPhone || '0'),
-              address: orderAny.customerAddress || ''
-            }
-          };
-        });
-        this.updateStats();
-      },
-      error: (error: any) => {
-        console.error('Failed to load orders:', error);
-        this.orders = [];
-      }
-    });
   }
 
   formatDate(date: string | Date): string {

@@ -7,22 +7,37 @@
 <footer class="main-footer">
   <div class="footer-container">
     <div class="footer-content">
-      <div class="footer-section">
+      <div class="footer-section company-info">
         <div class="footer-brand">
           <div class="brand-logo">
             <i class="bi bi-bag-check-fill"></i>
           </div>
           <a routerLink="/home" class="brand-name">MyStore</a>
         </div>
-        <p>Your trusted shopping destination</p>
+        <p class="company-quote">"Quality products, exceptional service, delivered with care."</p>
+        <div class="company-address">
+          <div class="address-item">
+            <i class="bi bi-geo-alt-fill"></i>
+            <span>123 Shopping Street, Commerce City, CC 12345</span>
+          </div>
+          <div class="address-item">
+            <i class="bi bi-telephone-fill"></i>
+            <span>+1 (555) 123-4567</span>
+          </div>
+          <div class="address-item">
+            <i class="bi bi-envelope-fill"></i>
+            <span>info@mystore.com</span>
+          </div>
+        </div>
       </div>
 
       <div class="footer-section">
         <h3>Shop</h3>
         <ul>
-          <li><a routerLink="/new-arrivals">New Arrivals</a></li>
-          <li><a routerLink="/sale">Sale</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{collection: 'New Arrivals'}">New Arrivals</a></li>
+          <li><a routerLink="/deals">Sale & Deals</a></li>
           <li><a routerLink="/products-page">All Products</a></li>
+          <li><a routerLink="/products-page" [queryParams]="{collection: 'Premium'}">Premium Collection</a></li>
         </ul>
       </div>
       
@@ -31,15 +46,45 @@
         <ul>
           <li><a routerLink="/aboutus">About Us</a></li>
           <li><a routerLink="/contact-us">Contact Us</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Privacy Policy</a></li>
         </ul>
       </div>
       
       <div class="footer-section">
         <h3>Support</h3>
         <ul>
-          <li><a href="#">Help Center</a></li>
-          <li><a href="#">Returns</a></li>
+          <li><a routerLink="/contact-us">Help Center</a></li>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">Size Guide</a></li>
+          <li><a href="#">FAQ</a></li>
         </ul>
+      </div>
+
+      <div class="footer-section social-section">
+        <h3>Follow Us</h3>
+        <div class="social-links">
+          <a href="#" class="social-link">
+            <i class="bi bi-facebook"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="bi bi-twitter"></i>
+          </a>
+          <a href="#" class="social-link">
+            <i class="bi bi-youtube"></i>
+          </a>
+        </div>
+        <div class="newsletter">
+          <h4>Newsletter</h4>
+          <p>Subscribe for updates and exclusive offers</p>
+          <div class="newsletter-form">
+            <input type="email" placeholder="Enter your email">
+            <button type="submit">Subscribe</button>
+          </div>
+        </div>
       </div>
     </div>
     

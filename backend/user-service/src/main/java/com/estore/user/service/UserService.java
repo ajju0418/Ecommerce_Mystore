@@ -71,7 +71,7 @@ public class UserService {
     }
 
     public List<UserResponseDto> getAllUsers() {
-        return userRepository.findAll().stream()
+        return userRepository.findByRoleNot("ADMIN").stream()
             .map(user -> new UserResponseDto(user.getId(), user.getUsername(), user.getEmail(), user.getPhone(), user.getGender(), user.getCreatedAt()))
             .collect(Collectors.toList());
     }

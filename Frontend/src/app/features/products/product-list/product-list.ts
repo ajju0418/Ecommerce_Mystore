@@ -36,8 +36,7 @@ export class ProductListComponent implements OnInit {
   
   // Filters
   selectedCategories: string[] = [];
-  selectedBrands: string[] = [];
-  selectedRatings: number[] = [];
+
   selectedDiscounts: number[] = [];
   selectedCollection = '';
   minPrice = 0;
@@ -49,14 +48,7 @@ export class ProductListComponent implements OnInit {
   
   // Filter options (collections fixed to original set)
   categories: string[] = [];
-  brands: string[] = [];
   collections: string[] = ['New Arrivals', 'Premium', 'Casual', 'Sports'];
-  ratings = [
-    { value: 4, text: '4★ & above', stars: [1,1,1,1], emptyStars: [1] },
-    { value: 3, text: '3★ & above', stars: [1,1,1], emptyStars: [1,1] },
-    { value: 2, text: '2★ & above', stars: [1,1], emptyStars: [1,1,1] },
-    { value: 1, text: '1★ & above', stars: [1], emptyStars: [1,1,1,1] }
-  ];
   discounts = [
     { value: 50, label: '50% or more' },
     { value: 40, label: '40% or more' },
@@ -99,6 +91,9 @@ export class ProductListComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    // Check route data for deals
+    const routeDeals = this.route.snapshot.data['deals'];
+    
     this.route.queryParams.subscribe(params => {
       const gender = (params['gender'] || '').toString();
       const category = (params['category'] || '').toString();
@@ -107,8 +102,6 @@ export class ProductListComponent implements OnInit {
 
       // Reset filters first
       this.selectedCategories = [];
-      this.selectedBrands = [];
-      this.selectedRatings = [];
       this.selectedDiscounts = [];
       this.selectedCollection = '';
 
@@ -120,7 +113,7 @@ export class ProductListComponent implements OnInit {
       if (category) {
         this.selectedCategories = [category];
       }
-      if (deals === 'true') {
+      if (deals === 'true' || routeDeals) {
         (this as any)._showDeals = true;
         this.loadProducts();
       } else {
@@ -154,13 +147,10 @@ export class ProductListComponent implements OnInit {
         }));
         // Populate filter options from loaded products to reflect database
         const categorySet = new Set<string>();
-        const brandSet = new Set<string>();
         this.products.forEach(p => {
           if (p.category) categorySet.add(p.category);
-          if (p.brand) brandSet.add(p.brand);
         });
         this.categories = Array.from(categorySet).sort();
-        this.brands = Array.from(brandSet).sort();
         this.applyFilters();
         this.loading = false;
       },
@@ -268,20 +258,14 @@ export class ProductListComponent implements OnInit {
       const categoryMatch = this.selectedCategories.length === 0 || 
         this.selectedCategories.some(c => prodCategory === c.toLowerCase());
 
-      const brandMatch = this.selectedBrands.length === 0 || 
-        this.selectedBrands.some(b => prodBrand === b.toLowerCase());
-
       const priceMatch = product.price >= this.minPrice && product.price <= this.maxPrice;
-
-      const ratingMatch = this.selectedRatings.length === 0 || 
-        this.selectedRatings.some(rating => (product.rating || 0) >= rating);
 
       const collectionMatch = !this.selectedCollection || 
         prodCollection === this.selectedCollection.toLowerCase();
 
       const genderMatch = !routeGender || prodGender === routeGender;
 
-      return categoryMatch && brandMatch && priceMatch && ratingMatch && collectionMatch && genderMatch;
+      return categoryMatch && priceMatch && collectionMatch && genderMatch;
     });
     
     // Sort deals by highest discount first
@@ -329,23 +313,7 @@ export class ProductListComponent implements OnInit {
     });
   }
 
-  onBrandChange(brand: string, checked: boolean): void {
-    if (checked) {
-      this.selectedBrands.push(brand);
-    } else {
-      this.selectedBrands = this.selectedBrands.filter(b => b !== brand);
-    }
-    this.applyFilters();
-  }
 
-  onRatingChange(rating: number, checked: boolean): void {
-    if (checked) {
-      this.selectedRatings.push(rating);
-    } else {
-      this.selectedRatings = this.selectedRatings.filter(r => r !== rating);
-    }
-    this.applyFilters();
-  }
 
   onDiscountChange(discount: number, checked: boolean): void {
     if (checked) {
@@ -356,16 +324,10 @@ export class ProductListComponent implements OnInit {
     this.applyFilters();
   }
 
-  getFilteredBrands(): string[] {
-    return this.brands.filter(brand => 
-      brand.toLowerCase().includes(this.brandSearchTerm.toLowerCase())
-    );
-  }
+
 
   clearAllFilters(): void {
     this.selectedCategories = [];
-    this.selectedBrands = [];
-    this.selectedRatings = [];
     this.selectedDiscounts = [];
     this.selectedCollection = '';
     this.minPrice = 0;
@@ -378,8 +340,6 @@ export class ProductListComponent implements OnInit {
     // Reset all filters when "All Products" is selected
     if (collection === '') {
       this.selectedCategories = [];
-      this.selectedBrands = [];
-      this.selectedRatings = [];
       this.selectedDiscounts = [];
       (this as any)._routeGender = '';
       this.minPrice = 0;
