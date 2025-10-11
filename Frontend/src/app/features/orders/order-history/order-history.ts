@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { OrderService, Order } from '../../../core/services/order-service';
 import { UserService } from '../../../core/services/user-service';
@@ -11,7 +11,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'app-order-history',
   standalone: true,
-  imports: [CommonModule, DatePipe, Header, Footer],
+  imports: [CommonModule, Header, Footer],
   templateUrl: './order-history.html',
   styleUrls: ['./order-history.css']
 })
@@ -112,7 +112,9 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
   // Method to view payment details
   viewPaymentDetails(order: Order): void {
     if (order.paymentDetails) {
-      const details = `Payment Details:\n\nTransaction ID: ${order.paymentDetails.transactionId}\nMethod: ${order.paymentDetails.method}\nStatus: ${order.paymentDetails.status}\nTimestamp: ${new Date(order.paymentDetails.timestamp).toLocaleString()}`;
+      const d = new Date(order.paymentDetails.timestamp);
+      const formattedDate = `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      const details = `Payment Details:\n\nTransaction ID: ${order.paymentDetails.transactionId}\nMethod: ${order.paymentDetails.method}\nStatus: ${order.paymentDetails.status}\nTimestamp: ${formattedDate}`;
       alert(details);
     }
   }
@@ -236,5 +238,14 @@ export class OrderHistoryComponent implements OnInit, OnDestroy {
       'FAILED': 'Order processing failed. Please contact support.'
     };
     return descriptionMap[status] || 'Status information not available.';
+  }
+
+  formatOrderDate(date: string | Date): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 }

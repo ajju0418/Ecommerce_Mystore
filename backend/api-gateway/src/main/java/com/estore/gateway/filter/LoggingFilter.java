@@ -24,14 +24,14 @@ public class LoggingFilter implements GlobalFilter, Ordered {
         ServerHttpRequest request = exchange.getRequest();
         String requestId = UUID.randomUUID().toString();
         
-        // Log incoming request
+        // Log incoming request (excluding sensitive headers)
         logger.info("=== INCOMING REQUEST [{}] ===", requestId);
-        logger.info("Method: {}", request.getMethod());
-        logger.info("URI: {}", request.getURI());
-        logger.info("Path: {}", request.getPath());
-        logger.info("Headers: {}", request.getHeaders());
-        logger.info("Remote Address: {}", request.getRemoteAddress());
-        logger.info("Timestamp: {}", LocalDateTime.now());
+        logger.info("Method: {} | Path: {} | Remote: {}", 
+            request.getMethod(), 
+            request.getPath().value(),
+            request.getRemoteAddress() != null ? request.getRemoteAddress().getAddress().getHostAddress() : "unknown");
+        logger.debug("Full URI: {}", request.getURI());
+        logger.debug("User-Agent: {}", request.getHeaders().getFirst("User-Agent"));
         
         // Add request ID to headers for tracking
         ServerHttpRequest modifiedRequest = request.mutate()
@@ -46,11 +46,10 @@ public class LoggingFilter implements GlobalFilter, Ordered {
             ServerHttpResponse response = exchange.getResponse();
             
             // Log outgoing response
-            logger.info("=== OUTGOING RESPONSE [{}] ===", requestId);
-            logger.info("Status Code: {}", response.getStatusCode());
-            logger.info("Headers: {}", response.getHeaders());
-            logger.info("Timestamp: {}", LocalDateTime.now());
-            logger.info("=== END REQUEST [{}] ===", requestId);
+            logger.info("=== RESPONSE [{}] | Status: {} ===", requestId, response.getStatusCode());
+            if (response.getStatusCode() != null && response.getStatusCode().isError()) {
+                logger.warn("Error response for request [{}]: {}", requestId, response.getStatusCode());
+            }
         }));
     }
 

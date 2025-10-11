@@ -5,14 +5,14 @@ import com.estore.payment.dto.PaymentResponse;
 import com.estore.payment.entity.Payment;
 import com.estore.payment.entity.PaymentStatus;
 import com.estore.payment.repository.PaymentRepository;
+import com.estore.payment.exception.PaymentNotFoundException;
+import com.estore.payment.exception.PaymentProcessingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,9 +25,6 @@ public class PaymentService {
     
     @Autowired
     private PaymentGatewayService paymentGatewayService;
-
-    @Autowired
-    private RestTemplate restTemplate;
 
     @Value("${order.service.url:http://localhost:9092/api/orders}")
     private String orderServiceUrl;
@@ -58,13 +55,11 @@ public class PaymentService {
                 payment.setStatus(PaymentStatus.COMPLETED);
                 payment.setPaymentDate(LocalDateTime.now());
                 payment.setGatewayResponse("Payment processed successfully");
-                // Update order status to PAID
-                updateOrderStatus(request.getOrderId(), "PAID");
+                // Order status will be updated via event or separate call
             } else {
                 payment.setStatus(PaymentStatus.FAILED);
                 payment.setGatewayResponse("Payment processing failed");
-                // Update order status to FAILED
-                updateOrderStatus(request.getOrderId(), "FAILED");
+                // Order status will be updated via event or separate call
             }
             
             payment = paymentRepository.save(payment);
@@ -83,14 +78,7 @@ public class PaymentService {
             failedPayment.setGatewayResponse("Payment processing error: " + e.getMessage());
             paymentRepository.save(failedPayment);
             
-            updateOrderStatus(request.getOrderId(), "FAILED");
-
-            return new PaymentResponse(
-                request.getOrderId(),
-                failedPayment.getTransactionId(),
-                PaymentStatus.FAILED,
-                "Payment processing failed: " + e.getMessage()
-            );
+            throw new PaymentProcessingException("Payment processing failed: " + e.getMessage(), e);
         }
     }
     
@@ -99,7 +87,7 @@ public class PaymentService {
         if (payment.isPresent()) {
             return mapToPaymentResponse(payment.get());
         }
-        throw new RuntimeException("Payment not found with transaction ID: " + transactionId);
+        throw new PaymentNotFoundException("Payment not found with transaction ID: " + transactionId);
     }
     
     public PaymentResponse getPaymentByOrderId(String orderId) {
@@ -107,7 +95,7 @@ public class PaymentService {
         if (payment.isPresent()) {
             return mapToPaymentResponse(payment.get());
         }
-        throw new RuntimeException("Payment not found for order ID: " + orderId);
+        throw new PaymentNotFoundException("Payment not found for order ID: " + orderId);
     }
     
     public List<Payment> getPaymentsByUserId(Long userId) {
@@ -129,7 +117,7 @@ public class PaymentService {
             payment = paymentRepository.save(payment);
             return mapToPaymentResponse(payment);
         }
-        throw new RuntimeException("Payment not found with transaction ID: " + transactionId);
+        throw new PaymentNotFoundException("Payment not found with transaction ID: " + transactionId);
     }
     
     public boolean verifyPayment(String transactionId) {
@@ -176,15 +164,5 @@ public class PaymentService {
         return response;
     }
 
-    private void updateOrderStatus(String orderId, String status) {
-        try {
-            String url = orderServiceUrl + "/" + orderId + "/status";
-            HashMap<String, String> body = new HashMap<>();
-            body.put("status", status);
-            restTemplate.put(url, body);
-        } catch (Exception ex) {
-            // Log error but do not fail payment processing
-            System.err.println("Failed to update order status: " + ex.getMessage());
-        }
-    }
+
 }

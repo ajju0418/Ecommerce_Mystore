@@ -26,4 +26,14 @@ public class ProductFilterService {
         List<Product> result = productRepository.findByBrandAndCategory(brand, category);
         return result != null ? result : Collections.emptyList();
     }
+
+    public List<Product> getOutOfStockProducts() {
+        List<Product> result = productRepository.findByStockOrStatus(0, "OUT_OF_STOCK");
+        return result != null ? result : Collections.emptyList();
+    }
+
+    public List<Product> getInactiveProducts() {
+        List<Product> result = productRepository.findByStatus("INACTIVE");
+        return result != null ? result : Collections.emptyList();
+    }
 }

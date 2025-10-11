@@ -1,5 +1,7 @@
 package com.estore.gateway.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
@@ -11,10 +13,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Gateway management controller providing health checks and service discovery information
+ */
 @RestController
 @RequestMapping("/gateway")
 @CrossOrigin(origins = "*")
 public class GatewayController {
+
+    private static final Logger logger = LoggerFactory.getLogger(GatewayController.class);
 
     @Autowired
     private DiscoveryClient discoveryClient;
@@ -51,9 +58,11 @@ public class GatewayController {
             services.put("timestamp", LocalDateTime.now());
             
         } catch (Exception e) {
+            logger.error("Error retrieving registered services", e);
             services.put("status", "ERROR");
-            services.put("error", e.getMessage());
+            services.put("error", "Failed to retrieve services: " + e.getMessage());
             services.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.status(500).body(services);
         }
         
         return ResponseEntity.ok(services);
@@ -99,9 +108,11 @@ public class GatewayController {
             serviceInfo.put("timestamp", LocalDateTime.now());
             
         } catch (Exception e) {
+            logger.error("Error retrieving service info for: {}", serviceName, e);
             serviceInfo.put("status", "ERROR");
-            serviceInfo.put("error", e.getMessage());
+            serviceInfo.put("error", "Failed to retrieve service info: " + e.getMessage());
             serviceInfo.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.status(500).body(serviceInfo);
         }
         
         return ResponseEntity.ok(serviceInfo);
@@ -126,8 +137,11 @@ public class GatewayController {
             stats.put("timestamp", LocalDateTime.now());
             
         } catch (Exception e) {
+            logger.error("Error retrieving gateway statistics", e);
             stats.put("status", "ERROR");
-            stats.put("error", e.getMessage());
+            stats.put("error", "Failed to retrieve statistics: " + e.getMessage());
+            stats.put("timestamp", LocalDateTime.now());
+            return ResponseEntity.status(500).body(stats);
         }
         
         return ResponseEntity.ok(stats);

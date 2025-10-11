@@ -131,50 +131,39 @@
   transform: translateY(-3px);
 }
 
-.newsletter h4 {
+.store-hours h4 {
   font-size: 16px;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
   color: #fff;
 }
 
-.newsletter p {
-  color: #a0aec0;
-  font-size: 14px;
-  margin-bottom: 15px;
-}
-
-.newsletter-form {
+.hours-list {
   display: flex;
+  flex-direction: column;
   gap: 8px;
 }
 
-.newsletter-form input {
-  flex: 1;
-  padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+.hours-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 14px;
 }
 
-.newsletter-form input::placeholder {
+.hours-item:last-child {
+  border-bottom: none;
+}
+
+.hours-item span:first-child {
   color: #a0aec0;
+  font-weight: 500;
 }
 
-.newsletter-form button {
-  padding: 10px 16px;
-  background: #667eea;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.3s ease;
-}
-
-.newsletter-form button:hover {
-  background: #5a67d8;
+.hours-item span:last-child {
+  color: #cbd5e0;
+  font-weight: 600;
 }
 
 .footer-bottom {

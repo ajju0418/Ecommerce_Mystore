@@ -5,17 +5,17 @@ import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "order-service")
 public interface OrderServiceFeignClient {
-    @GetMapping("/api/orders")
+    @GetMapping("/api/orders/all")
     Object getAllOrders();
 
     @GetMapping("/api/orders/{id}")
     Object getOrderById(@PathVariable("id") Long id);
 
-    @PostMapping("/api/orders")
-    Object createOrder(@RequestBody Object orderDto);
+    @GetMapping("/api/orders/user/{userId}")
+    Object getUserOrders(@PathVariable("userId") Long userId);
 
-    @PutMapping("/api/orders/{id}")
-    Object updateOrder(@PathVariable("id") Long id, @RequestBody Object orderDto);
+    @PutMapping("/api/orders/{id}/status")
+    Object updateOrderStatus(@PathVariable("id") String id, @RequestBody Object statusUpdate);
 
     @DeleteMapping("/api/orders/{id}")
     Object deleteOrder(@PathVariable("id") Long id);

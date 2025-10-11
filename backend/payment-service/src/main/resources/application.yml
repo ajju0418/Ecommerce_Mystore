@@ -4,11 +4,15 @@ server:
 spring:
   application:
     name: payment-service
+  jackson:
+    date-format: dd-MM-yyyy
+    time-zone: UTC
   datasource:
-    url: jdbc:mysql://localhost:3306/estore_payments?createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/estore_payments?createDatabaseIfNotExist=true&autoReconnect=true&useSSL=false&allowPublicKeyRetrieval=true
     username: root
     password: Ajjuvarsh@7
     driver-class-name: com.mysql.cj.jdbc.Driver
+    continue-on-error: true
     hikari:
       minimum-idle: 5
       maximum-pool-size: 20
@@ -24,6 +28,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    open-in-view: false
+    database-platform: org.hibernate.dialect.MySQLDialect
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect

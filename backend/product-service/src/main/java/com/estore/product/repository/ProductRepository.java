@@ -2,6 +2,7 @@ package com.estore.product.repository;
 
 import com.estore.product.entity.Product;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> findByCategory(String category);
     List<Product> findByBrand(String brand);
     List<Product> findByBrandAndCategory(String brand, String category);
+    List<Product> findByStockLessThanEqualOrStatus(Integer stock, String status);
 }

@@ -66,7 +66,7 @@ export class AdminCustomers implements OnInit {
                 email: user.email,
                 phone: user.phone,
                 status: 'Active',
-                joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A',
+                joinDate: user.createdAt ? this.formatDate(user.createdAt) : 'N/A',
                 orders: stats.orders,
                 totalSpent: stats.totalSpent
               };
@@ -80,7 +80,7 @@ export class AdminCustomers implements OnInit {
               email: u.email,
               phone: u.phone,
               status: 'Active',
-              joinDate: u.createdAt ? new Date(u.createdAt).toLocaleDateString() : 'N/A',
+              joinDate: u.createdAt ? this.formatDate(u.createdAt) : 'N/A',
               orders: 0,
               totalSpent: 0
             }));
@@ -160,5 +160,14 @@ export class AdminCustomers implements OnInit {
 
   getStatusClass(status: string): string {
     return status === 'Active' ? 'status-active' : 'status-inactive';
+  }
+
+  formatDate(date: string | Date): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 }

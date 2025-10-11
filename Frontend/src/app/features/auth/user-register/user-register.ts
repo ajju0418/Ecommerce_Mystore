@@ -68,7 +68,7 @@ export class UserRegister implements CanComponentDeactivate {
     return this.formSubmitted || !this.registrationForm.dirty || confirm('You have unsaved changes. Do you want to leave this page?');
   }
   
-  // Called when the form is submitted
+
   onSubmit(): void {
     if (this.registrationForm.valid) {
       const registerRequest = {
@@ -86,8 +86,7 @@ export class UserRegister implements CanComponentDeactivate {
           this.formSubmitted = true;
           alert('User registered successfully!');
           console.log('Registration Successful');
-          // User is automatically logged in after registration
-          this.router.navigate(['/home']);
+          this.router.navigate(['/login']);
         },
         error: (error) => {
           console.error('Registration failed:', error);

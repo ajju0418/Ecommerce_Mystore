@@ -1,5 +1,7 @@
 package com.estore.gateway.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -19,11 +21,18 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
     private final ConcurrentHashMap<String, RequestCounter> requestCounts = new ConcurrentHashMap<>();
     private final int maxRequestsPerMinute;
 
+    private static final Logger logger = LoggerFactory.getLogger(RateLimitingFilter.class);
+    
     public RateLimitingFilter() {
         String env = System.getenv("GATEWAY_RATE_LIMIT_PER_MINUTE");
         int configured = 600; // default higher limit to avoid dev throttling
         if (env != null) {
-            try { configured = Integer.parseInt(env); } catch (NumberFormatException ignored) {}
+            try { 
+                configured = Integer.parseInt(env);
+                logger.info("Rate limit configured from environment: {} requests/minute", configured);
+            } catch (NumberFormatException e) {
+                logger.warn("Invalid rate limit configuration '{}', using default: {}", env, configured);
+            }
         }
         this.maxRequestsPerMinute = configured;
     }
@@ -39,8 +48,11 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         }
 
         if (isRateLimited(clientId)) {
+            logger.warn("Rate limit exceeded for client: {}", clientId);
             exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
             exchange.getResponse().getHeaders().add("X-Rate-Limit-Exceeded", "true");
+            exchange.getResponse().getHeaders().add("X-Rate-Limit-Limit", String.valueOf(maxRequestsPerMinute));
+            exchange.getResponse().getHeaders().add("Retry-After", "60");
             return exchange.getResponse().setComplete();
         }
 
@@ -58,17 +70,29 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         return userId != null ? "user-" + userId : "ip-" + clientIp;
     }
 
+    /**
+     * Check if client has exceeded rate limit
+     * Uses sliding window approach for accurate rate limiting
+     */
     private boolean isRateLimited(String clientId) {
         LocalDateTime now = LocalDateTime.now();
         RequestCounter counter = requestCounts.computeIfAbsent(clientId, 
             k -> new RequestCounter(now));
 
-        // Reset counter if more than a minute has passed
-        if (ChronoUnit.MINUTES.between(counter.windowStart, now) >= 1) {
-            counter.reset(now);
+        synchronized (counter) {
+            // Reset counter if more than a minute has passed
+            if (ChronoUnit.MINUTES.between(counter.windowStart, now) >= 1) {
+                counter.reset(now);
+            }
+            
+            int currentCount = counter.increment();
+            if (currentCount > maxRequestsPerMinute) {
+                logger.debug("Rate limit check: client {} has {} requests (limit: {})", 
+                    clientId, currentCount, maxRequestsPerMinute);
+                return true;
+            }
+            return false;
         }
-
-        return counter.increment() > maxRequestsPerMinute;
     }
 
     @Override

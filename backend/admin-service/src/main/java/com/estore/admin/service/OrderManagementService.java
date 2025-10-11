@@ -1,103 +1,78 @@
 package com.estore.admin.service;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.estore.admin.client.OrderServiceFeignClient;
 import com.estore.admin.dto.OrderStatusUpdateDto;
 
 @Service
 public class OrderManagementService {
     
+    private static final Logger logger = LoggerFactory.getLogger(OrderManagementService.class);
+    
     @Autowired
-    private RestTemplate restTemplate;
+    private OrderServiceFeignClient orderServiceClient;
 
     public Object getAllOrders() {
-        return restTemplate.getForObject("http://order-service/api/orders/all", Object.class);
+        return orderServiceClient.getAllOrders();
     }
 
     public Object getOrderById(String orderId) {
-        return restTemplate.getForObject("http://order-service/api/orders/" + orderId, Object.class);
+        if (orderId == null || orderId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Order ID cannot be null or empty");
+        }
+        try {
+            return orderServiceClient.getOrderById(Long.parseLong(orderId));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid order ID format: " + orderId);
+        }
     }
 
     public Object getUserOrders(Long userId) {
-        return restTemplate.getForObject("http://order-service/api/orders/user/" + userId, Object.class);
+        return orderServiceClient.getUserOrders(userId);
     }
 
     public Object updateOrderStatus(OrderStatusUpdateDto updateDto) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("status", updateDto.getStatus());
-        
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-        
-        String url = "http://order-service/api/orders/" + updateDto.getOrderId() + "/status";
-        return restTemplate.exchange(url, HttpMethod.PUT, request, Object.class).getBody();
+        return orderServiceClient.updateOrderStatus(updateDto.getOrderId(), updateDto);
     }
     
     public Object deleteOrder(String orderId) {
+        if (orderId == null || orderId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Order ID cannot be null or empty");
+        }
         try {
-            System.out.println("OrderManagementService: Deleting order via: http://order-service/api/orders/" + orderId);
-            String url = "http://order-service/api/orders/" + orderId;
-            Object result = restTemplate.exchange(url, HttpMethod.DELETE, null, Object.class).getBody();
-            System.out.println("OrderManagementService: Delete successful");
+            logger.info("Deleting order: {}", orderId != null ? orderId.replaceAll("[\r\n]", "") : "null");
+            Object result = orderServiceClient.deleteOrder(Long.parseLong(orderId));
+            logger.info("Delete successful for order: {}", orderId != null ? orderId.replaceAll("[\r\n]", "") : "null");
             return result;
-        } catch (Exception e) {
-            System.out.println("OrderManagementService: Delete failed: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        } catch (NumberFormatException e) {
+            logger.error("Invalid order ID format provided");
+            throw new IllegalArgumentException("Invalid order ID format: " + orderId);
         }
     }
 
     public Object acceptOrder(String orderId) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        
-        Map<String, String> requestBody = new HashMap<>();
-        requestBody.put("status", "PROCESSING");
-        
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-        
-        String url = "http://order-service/api/orders/" + orderId + "/status";
-        return restTemplate.exchange(url, HttpMethod.PUT, request, Object.class).getBody();
+        OrderStatusUpdateDto updateDto = new OrderStatusUpdateDto();
+        updateDto.setOrderId(orderId);
+        updateDto.setStatus("PROCESSING");
+        return orderServiceClient.updateOrderStatus(orderId, updateDto);
     }
 
-    public Object removeOrder(String orderId) {
-        String url = "http://order-service/api/orders/" + orderId;
-        return restTemplate.exchange(url, HttpMethod.DELETE, null, Object.class).getBody();
-    }
+
     
     public Object markOrderAsCompleted(String orderId) {
-        try {
-            System.out.println("OrderManagementService: Marking order as completed: " + orderId);
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            
-            Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("status", "COMPLETED");
-            
-            HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-            
-            String url = "http://order-service/api/orders/" + orderId + "/status";
-            Object result = restTemplate.exchange(url, HttpMethod.PUT, request, Object.class).getBody();
-            
-            System.out.println("OrderManagementService: Successfully marked order as completed");
-            return result;
-        } catch (Exception e) {
-            System.out.println("OrderManagementService: Failed to mark order as completed: " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+        if (orderId == null || orderId.trim().isEmpty()) {
+            throw new IllegalArgumentException("Order ID cannot be null or empty");
         }
+        logger.info("Marking order as completed: {}", orderId != null ? orderId.replaceAll("[\r\n]", "") : "null");
+        OrderStatusUpdateDto updateDto = new OrderStatusUpdateDto();
+        updateDto.setOrderId(orderId);
+        updateDto.setStatus("COMPLETED");
+        Object result = orderServiceClient.updateOrderStatus(orderId, updateDto);
+        logger.info("Successfully marked order as completed: {}", orderId != null ? orderId.replaceAll("[\r\n]", "") : "null");
+        return result;
     }
 
 }

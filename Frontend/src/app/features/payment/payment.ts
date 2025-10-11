@@ -80,8 +80,18 @@ export class PaymentComponent implements OnInit {
     }
 
     const currentUser = this.userService.getCurrentUser();
+    const token = this.userService.getToken();
+    console.log('Payment - Current User:', currentUser);
+    console.log('Payment - Token:', token ? 'Present (length: ' + token.length + ')' : 'Missing');
+    console.log('Payment - Token Valid:', this.userService.isTokenValid());
+    
     if (!currentUser?.id) {
       alert('Please login to continue payment');
+      return;
+    }
+    
+    if (!token) {
+      alert('Authentication token missing. Please login again.');
       return;
     }
 
@@ -109,6 +119,7 @@ export class PaymentComponent implements OnInit {
     };
 
     // Process payment with the backend payment service
+    console.log('Sending payment request:', paymentRequest);
     this.paymentService.processPayment(paymentRequest).subscribe({
       next: (paymentResponse) => {
         console.log('Payment processing complete:', paymentResponse);
@@ -175,7 +186,20 @@ export class PaymentComponent implements OnInit {
         console.error('Payment processing error:', error);
         this.isProcessing = false;
         this.paymentStatus = 'failed';
-        this.paymentFailureReason = 'Payment service error. Please try again.';
+        
+        // Provide more specific error messages
+        if (error.status === 0) {
+          this.paymentFailureReason = 'Unable to connect to payment service. Please check your internet connection.';
+        } else if (error.status === 404) {
+          this.paymentFailureReason = 'Payment service not found. Please contact support.';
+        } else if (error.status === 500) {
+          this.paymentFailureReason = 'Payment service error. Please try again later.';
+        } else if (error.error?.message) {
+          this.paymentFailureReason = error.error.message;
+        } else {
+          this.paymentFailureReason = 'Payment failed. Please try again.';
+        }
+        
         this.paymentStep = 4;
       }
     });

@@ -152,6 +152,11 @@ export class AdminProducts implements OnInit {
     console.log('Editing product:', this.editingProduct);
     console.log('Product ID:', this.editingProduct?.id);
     if (this.editingProduct && this.editingProduct.id && this.editingProduct.id.trim() !== '') {
+      // Set stock to 0 if status is OUT_OF_STOCK
+      if (this.editingProduct.status === 'OUT_OF_STOCK') {
+        this.editingProduct.stock = 0;
+      }
+      
       const productToUpdate: any = {
         id: this.editingProduct.id,
         name: this.editingProduct.name,
@@ -235,5 +240,14 @@ export class AdminProducts implements OnInit {
 
   private generateProductId(): string {
     return 'PROD_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  getDisplayStatus(status: string | undefined): string {
+    switch (status) {
+      case 'ACTIVE': return 'Active';
+      case 'INACTIVE': return 'Inactive';
+      case 'OUT_OF_STOCK': return 'Out of Stock';
+      default: return status || 'Unknown';
+    }
   }
 }

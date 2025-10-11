@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { OrderService, Order } from '../../../core/services/order-service';
 import { UserService } from '../../../core/services/user-service';
@@ -9,7 +9,7 @@ import { Footer } from '../../../layout/footer/footer';
 @Component({
   selector: 'app-order-details',
   standalone: true,
-  imports: [CommonModule, DatePipe, Header, Footer],
+  imports: [CommonModule, Header, Footer],
   templateUrl: './order-details.html',
   styleUrls: ['./order-details.css']
 })
@@ -48,6 +48,13 @@ export class OrderDetailsComponent implements OnInit {
     this.error = null;
     this.orderService.fetchOrderById(orderId).subscribe({
       next: (order) => {
+        const currentUser = this.userService.getCurrentUser();
+        // Check if the order belongs to the current user
+        if (order.userId && currentUser?.id && order.userId.toString() !== currentUser.id.toString()) {
+          this.error = 'You are not authorized to view this order.';
+          this.loading = false;
+          return;
+        }
         this.order = order;
         this.loading = false;
       },
@@ -87,5 +94,14 @@ export class OrderDetailsComponent implements OnInit {
       default: 
         return 'bg-gray-100 text-gray-800';
     }
+  }
+
+  formatOrderDate(date: string | Date): string {
+    if (!date) return 'N/A';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   }
 }

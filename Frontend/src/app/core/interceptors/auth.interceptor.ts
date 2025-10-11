@@ -8,14 +8,17 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler) {
     const token = this.userService.getToken();
+    console.log('Auth Interceptor - URL:', req.url, 'Token:', token ? 'Present' : 'Missing');
     
     if (token) {
       const authReq = req.clone({
         headers: req.headers.set('Authorization', `Bearer ${token}`)
       });
+      console.log('Auth Interceptor - Adding Authorization header');
       return next.handle(authReq);
     }
     
+    console.log('Auth Interceptor - No token, sending request without auth');
     return next.handle(req);
   }
 }

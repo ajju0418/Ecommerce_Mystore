@@ -1,5 +1,7 @@
 C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\config\ServiceClientConfig.java
+C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\controller\FallbackController.java
 C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\controller\GatewayController.java
+C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\exception\GlobalExceptionHandler.java
 C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\filter\LoggingFilter.java
 C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\filter\RateLimitingFilter.java
 C:\Users\2432027\OneDrive - Cognizant\ajay-final\backend\api-gateway\src\main\java\com\estore\gateway\config\GatewayConfig.java

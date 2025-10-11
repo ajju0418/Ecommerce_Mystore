@@ -38,15 +38,23 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "http://localhost:4200"
+            allowedOrigins: 
+              - "http://localhost:4200"
+              - "http://localhost:3000"
             allowedMethods:
               - GET
               - POST
               - PUT
               - DELETE
               - OPTIONS
-            allowedHeaders: "*"
+              - PATCH
+            allowedHeaders: 
+              - "Authorization"
+              - "Content-Type"
+              - "X-Requested-With"
+              - "X-Request-ID"
             allowCredentials: true
+            maxAge: 3600
 
 eureka:
   client:
@@ -78,6 +86,44 @@ info:
     name: E-Store API Gateway
     description: API Gateway for E-Store Microservices
     version: 1.0.0
+
+# Logging configuration
+logging:
+  level:
+    com.estore.gateway: INFO
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+# Circuit breaker configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      user-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+      product-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+      cart-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+      order-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+      payment-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+      admin-service-cb:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
 
 jwt:
   secret: c3VwZXItc2VjcmV0LXN1cGVyLXNlY3JldC1zdXBlci1zZWNyZXQyNTY=

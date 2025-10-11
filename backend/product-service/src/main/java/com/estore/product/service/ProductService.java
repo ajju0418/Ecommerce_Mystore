@@ -14,7 +14,7 @@ public class ProductService {
     private ProductRepository productRepository;
 
     public List<Product> getAllProducts() {
-        return productRepository.findByStatus("ACTIVE");
+        return productRepository.findAll();
     }
 
     public List<Product> getProductsByCollection(String collection) {

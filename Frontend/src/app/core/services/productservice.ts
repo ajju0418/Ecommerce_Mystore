@@ -117,6 +117,22 @@ export class Productservice {
       );
   }
 
+  getOutOfStockProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/filter/out-of-stock`)
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      );
+  }
+
+  getInactiveProducts(): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.apiUrl}/filter/inactive`)
+      .pipe(
+        retry(2),
+        catchError(this.handleError)
+      );
+  }
+
   private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An error occurred';
     if (error.error instanceof ErrorEvent) {

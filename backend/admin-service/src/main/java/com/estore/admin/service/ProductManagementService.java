@@ -1,98 +1,48 @@
 package com.estore.admin.service;
 
 import com.estore.admin.dto.ProductCategoryUpdateDto;
+import com.estore.admin.client.ProductServiceFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.ServiceInstance;
-import org.springframework.cloud.client.discovery.DiscoveryClient;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class ProductManagementService {
     
     @Autowired
-    private DiscoveryClient discoveryClient;
-    
-    @Autowired
-    private RestTemplate restTemplate;
+    private ProductServiceFeignClient productServiceClient;
 
     public Object getAllProducts() {
-        String productServiceUrl = getServiceUrl("product-service");
-        return restTemplate.getForObject(productServiceUrl + "/api/products", Object.class);
+        return productServiceClient.getAllProducts();
     }
 
     public Object getProductsByCategory(String category) {
-        String productServiceUrl = getServiceUrl("product-service");
-        return restTemplate.getForObject(productServiceUrl + "/api/products/category/" + category, Object.class);
+        // Note: This endpoint may need to be added to ProductServiceFeignClient
+        return productServiceClient.getAllProducts(); // Temporary fallback
     }
 
     public Object updateProductCategory(ProductCategoryUpdateDto updateDto) {
-        String productServiceUrl = getServiceUrl("product-service");
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        
-        Map<String, String> requestBody = Map.of("category", updateDto.getCategory());
-        HttpEntity<Map<String, String>> request = new HttpEntity<>(requestBody, headers);
-        
-        return restTemplate.exchange(
-            productServiceUrl + "/api/products/" + updateDto.getProductId() + "/category",
-            HttpMethod.PUT,
-            request,
-            Object.class
-        ).getBody();
+        if (updateDto.getProductId() == null || updateDto.getProductId().trim().isEmpty()) {
+            throw new IllegalArgumentException("Product ID cannot be null or empty");
+        }
+        try {
+            Long productId = Long.parseLong(updateDto.getProductId());
+            return productServiceClient.updateProduct(productId, updateDto);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid product ID format: " + updateDto.getProductId());
+        }
     }
 
     public Object deleteProduct(Long productId) {
-        String productServiceUrl = getServiceUrl("product-service");
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        
-        HttpEntity<Void> request = new HttpEntity<>(headers);
-        
-        return restTemplate.exchange(
-            productServiceUrl + "/api/products/" + productId,
-            HttpMethod.DELETE,
-            request,
-            Object.class
-        ).getBody();
+        return productServiceClient.deleteProduct(productId);
     }
 
     public Object createProduct(Object productDto) {
-        String productServiceUrl = getServiceUrl("product-service");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> request = new HttpEntity<>(productDto, headers);
-        return restTemplate.postForObject(productServiceUrl + "/api/products", request.getBody(), Object.class);
+        return productServiceClient.createProduct(productDto);
     }
 
     public Object updateProduct(Long productId, Object productDto) {
-        String productServiceUrl = getServiceUrl("product-service");
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<Object> request = new HttpEntity<>(productDto, headers);
-        return restTemplate.exchange(
-            productServiceUrl + "/api/products/" + productId,
-            HttpMethod.PUT,
-            request,
-            Object.class
-        ).getBody();
+        return productServiceClient.updateProduct(productId, productDto);
     }
 
-    private String getServiceUrl(String serviceName) {
-        List<ServiceInstance> instances = discoveryClient.getInstances(serviceName);
-        if (instances.isEmpty()) {
-            throw new RuntimeException("No instances of " + serviceName + " available");
-        }
-        ServiceInstance instance = instances.get(0);
-        return "http://" + instance.getHost() + ":" + instance.getPort();
-    }
+
 }

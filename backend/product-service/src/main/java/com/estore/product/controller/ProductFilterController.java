@@ -33,6 +33,18 @@ public class ProductFilterController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
     }
 
+    @GetMapping(value = "/out-of-stock", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Product>> getOutOfStockProducts() {
+        List<Product> products = productFilterService.getOutOfStockProducts();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    }
+
+    @GetMapping(value = "/inactive", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Product>> getInactiveProducts() {
+        List<Product> products = productFilterService.getInactiveProducts();
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    }
+
     @GetMapping(value = "/test-json", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<Object>> testJson() {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(Collections.emptyList());

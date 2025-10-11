@@ -22,10 +22,15 @@ public class PaymentController {
     
     @PostMapping("/process")
     public ResponseEntity<PaymentResponse> processPayment(@RequestBody PaymentRequest request) {
+        System.out.println("[DEBUG] Payment process endpoint called with request: " + request);
         try {
+            System.out.println("[DEBUG] Calling payment service...");
             PaymentResponse response = paymentService.processPayment(request);
+            System.out.println("[DEBUG] Payment service returned: " + response);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
+            System.err.println("[ERROR] Payment processing failed: " + e.getMessage());
+            e.printStackTrace();
             PaymentResponse errorResponse = new PaymentResponse();
             errorResponse.setSuccess(false);
             errorResponse.setMessage("Payment processing failed: " + e.getMessage());
@@ -121,6 +126,14 @@ public class PaymentController {
         return ResponseEntity.ok(Map.of(
             "status", "UP",
             "service", "Payment Service",
+            "timestamp", java.time.LocalDateTime.now().toString()
+        ));
+    }
+    
+    @GetMapping("/test")
+    public ResponseEntity<Map<String, String>> testEndpoint() {
+        return ResponseEntity.ok(Map.of(
+            "message", "Payment service is working",
             "timestamp", java.time.LocalDateTime.now().toString()
         ));
     }

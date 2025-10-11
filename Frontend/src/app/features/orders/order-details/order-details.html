@@ -55,7 +55,7 @@
             <h3><i class="bi bi-clipboard-data"></i> Order Summary</h3>
             <div class="info-item">
               <span class="label">Order Date:</span>
-              <span class="value">{{ order.createdAt | date:'fullDate' }}</span>
+              <span class="value">{{ formatOrderDate(order.createdAt || order.orderDate) }}</span>
             </div>
             <div class="info-item">
               <span class="label">Total Amount:</span>

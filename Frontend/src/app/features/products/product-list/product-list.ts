@@ -99,6 +99,8 @@ export class ProductListComponent implements OnInit {
       const category = (params['category'] || '').toString();
       const collection = (params['collection'] || '').toString();
       const deals = (params['deals'] || '').toString();
+      const outOfStock = (params['outOfStock'] || '').toString();
+      const inactive = (params['inactive'] || '').toString();
 
       // Reset filters first
       this.selectedCategories = [];
@@ -116,8 +118,16 @@ export class ProductListComponent implements OnInit {
       if (deals === 'true' || routeDeals) {
         (this as any)._showDeals = true;
         this.loadProducts();
+      } else if (outOfStock === 'true') {
+        (this as any)._showOutOfStock = true;
+        this.loadOutOfStockProducts();
+      } else if (inactive === 'true') {
+        (this as any)._showInactive = true;
+        this.loadInactiveProducts();
       } else {
         (this as any)._showDeals = false;
+        (this as any)._showOutOfStock = false;
+        (this as any)._showInactive = false;
         if (collection) {
           this.selectedCollection = collection;
           this.loadProductsByCollection(collection);
@@ -185,6 +195,64 @@ export class ProductListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load products by collection:', error);
+        this.products = [];
+        this.filteredProducts = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  loadOutOfStockProducts(): void {
+    this.loading = true;
+    this.productService.getOutOfStockProducts().subscribe({
+      next: (products) => {
+        this.products = products.map(p => ({
+          id: p.id ?? '',
+          name: p.name ?? '',
+          category: p.category ?? '',
+          brand: p.brand ?? '',
+          price: p.price ?? 0,
+          originalPrice: (p as any).originalPrice ?? 0,
+          imageUrl: p.imageUrl ?? '',
+          rating: p.rating ?? 0,
+          reviewCount: 0,
+          collection: p.collection ?? '',
+          gender: (p as any).gender ?? ''
+        }));
+        this.filteredProducts = [...this.products]; // Show all out of stock products
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load out of stock products:', error);
+        this.products = [];
+        this.filteredProducts = [];
+        this.loading = false;
+      }
+    });
+  }
+
+  loadInactiveProducts(): void {
+    this.loading = true;
+    this.productService.getInactiveProducts().subscribe({
+      next: (products) => {
+        this.products = products.map(p => ({
+          id: p.id ?? '',
+          name: p.name ?? '',
+          category: p.category ?? '',
+          brand: p.brand ?? '',
+          price: p.price ?? 0,
+          originalPrice: (p as any).originalPrice ?? 0,
+          imageUrl: p.imageUrl ?? '',
+          rating: p.rating ?? 0,
+          reviewCount: 0,
+          collection: p.collection ?? '',
+          gender: (p as any).gender ?? ''
+        }));
+        this.filteredProducts = [...this.products]; // Show all inactive products
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Failed to load inactive products:', error);
         this.products = [];
         this.filteredProducts = [];
         this.loading = false;
