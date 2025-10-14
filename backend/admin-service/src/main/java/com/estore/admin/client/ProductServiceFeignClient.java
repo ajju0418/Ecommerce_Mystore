@@ -8,6 +8,9 @@ public interface ProductServiceFeignClient {
     @GetMapping("/api/products")
     Object getAllProducts();
 
+    @GetMapping("/api/products/category/{category}")
+    Object getProductsByCategory(@PathVariable("category") String category);
+
     @GetMapping("/api/products/{id}")
     Object getProductById(@PathVariable("id") Long id);
 

@@ -2,51 +2,60 @@ package com.estore.product.controller;
 
 import com.estore.product.entity.Product;
 import com.estore.product.service.ProductFilterService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.*;
-import java.util.Collections;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/products/filter")
+@Tag(name = "Product Filter")
+@ApiResponses({
+    @ApiResponse(responseCode = "200", description = "Success"),
+    @ApiResponse(responseCode = "500", description = "Server error")
+})
 public class ProductFilterController {
-    @Autowired
-    private ProductFilterService productFilterService;
-
-    @GetMapping(value = "/category/{category}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Product>> getProductsByCategory(@PathVariable String category) {
-        List<Product> products = productFilterService.getProductsByCategory(category);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    
+    private final ProductFilterService productFilterService;
+    
+    public ProductFilterController(ProductFilterService productFilterService) {
+        this.productFilterService = productFilterService;
     }
 
-    @GetMapping(value = "/brand/{brand}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Product>> getProductsByBrand(@PathVariable String brand) {
-        List<Product> products = productFilterService.getProductsByBrand(brand);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    @GetMapping("/category/{category}")
+    @Operation(summary = "Get products by category")
+    public List<Product> getProductsByCategory(
+            @Parameter(example = "Electronics") @PathVariable String category) {
+        return productFilterService.getProductsByCategory(category);
     }
 
-    @GetMapping(value = "/brand/{brand}/category/{category}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Product>> getProductsByBrandAndCategory(@PathVariable String brand, @PathVariable String category) {
-        List<Product> products = productFilterService.getProductsByBrandAndCategory(brand, category);
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    @GetMapping("/brand/{brand}")
+    @Operation(summary = "Get products by brand")
+    public List<Product> getProductsByBrand(
+            @Parameter(example = "Samsung") @PathVariable String brand) {
+        return productFilterService.getProductsByBrand(brand);
     }
 
-    @GetMapping(value = "/out-of-stock", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Product>> getOutOfStockProducts() {
-        List<Product> products = productFilterService.getOutOfStockProducts();
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    @GetMapping("/brand/{brand}/category/{category}")
+    @Operation(summary = "Get products by brand and category")
+    public List<Product> getProductsByBrandAndCategory(
+            @Parameter(example = "Samsung") @PathVariable String brand,
+            @Parameter(example = "Electronics") @PathVariable String category) {
+        return productFilterService.getProductsByBrandAndCategory(brand, category);
     }
 
-    @GetMapping(value = "/inactive", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Product>> getInactiveProducts() {
-        List<Product> products = productFilterService.getInactiveProducts();
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(products);
+    @GetMapping("/out-of-stock")
+    @Operation(summary = "Get out of stock products")
+    public List<Product> getOutOfStockProducts() {
+        return productFilterService.getOutOfStockProducts();
     }
 
-    @GetMapping(value = "/test-json", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Object>> testJson() {
-        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(Collections.emptyList());
+    @GetMapping("/inactive")
+    @Operation(summary = "Get inactive products")
+    public List<Product> getInactiveProducts() {
+        return productFilterService.getInactiveProducts();
     }
 }

@@ -11,18 +11,10 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-/**
- * Security configuration for API Gateway
- * Handles CORS and basic security settings for reactive web stack
- */
 @Configuration
 @EnableWebFluxSecurity
 public class SecurityConfig {
 
-    /**
-     * Configure security filter chain for reactive web
-     * Disables CSRF for stateless API, enables CORS, permits all exchanges
-     */
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
@@ -37,10 +29,7 @@ public class SecurityConfig {
             .build();
     }
 
-    /**
-     * Configure CORS settings for cross-origin requests
-     * Allows frontend application to communicate with gateway
-     */
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

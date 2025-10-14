@@ -12,19 +12,11 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-/**
- * Gateway routing configuration
- * Defines routes to microservices and CORS settings
- */
 @Configuration
 public class GatewayConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(GatewayConfig.class);
 
-    /**
-     * Configure custom routes for microservices
-     * Uses load balancer for service discovery
-     */
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder builder) {
         logger.info("Configuring gateway routes for microservices");

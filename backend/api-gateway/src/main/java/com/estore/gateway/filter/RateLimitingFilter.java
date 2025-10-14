@@ -70,10 +70,7 @@ public class RateLimitingFilter implements GlobalFilter, Ordered {
         return userId != null ? "user-" + userId : "ip-" + clientIp;
     }
 
-    /**
-     * Check if client has exceeded rate limit
-     * Uses sliding window approach for accurate rate limiting
-     */
+    
     private boolean isRateLimited(String clientId) {
         LocalDateTime now = LocalDateTime.now();
         RequestCounter counter = requestCounts.computeIfAbsent(clientId, 

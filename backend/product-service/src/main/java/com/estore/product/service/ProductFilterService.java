@@ -28,7 +28,7 @@ public class ProductFilterService {
     }
 
     public List<Product> getOutOfStockProducts() {
-        List<Product> result = productRepository.findByStockOrStatus(0, "OUT_OF_STOCK");
+        List<Product> result = productRepository.findByStockLessThanEqualOrStatus(0, "OUT_OF_STOCK");
         return result != null ? result : Collections.emptyList();
     }
 

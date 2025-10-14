@@ -1,4 +1,3 @@
-com\estore\product\service\ProductFilterService.class
 com\estore\product\ProductServiceHealthController.class
 com\estore\product\config\DataInitializer.class
 com\estore\product\repository\ProductRepository.class

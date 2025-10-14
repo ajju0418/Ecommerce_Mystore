@@ -16,8 +16,7 @@ public class ProductManagementService {
     }
 
     public Object getProductsByCategory(String category) {
-        // Note: This endpoint may need to be added to ProductServiceFeignClient
-        return productServiceClient.getAllProducts(); // Temporary fallback
+        return productServiceClient.getProductsByCategory(category);
     }
 
     public Object updateProductCategory(ProductCategoryUpdateDto updateDto) {
