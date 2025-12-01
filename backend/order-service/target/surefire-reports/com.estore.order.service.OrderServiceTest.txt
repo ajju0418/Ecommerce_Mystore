@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: com.estore.order.service.OrderServiceTest
--------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.714 s -- in com.estore.order.service.OrderServiceTest
